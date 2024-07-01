@@ -1,0 +1,356 @@
+# FCA
+
+El Análisis Formal de Conceptos (FCA) es una técnica matemática utilizada para descubrir y visualizar estructuras de datos. Se basa en la teoría de conjuntos y la lógica algebraica para identificar patrones y relaciones entre datos en un contexto formal. Un contexto formal consta de un conjunto de objetos, un conjunto de atributos y una relación binaria que indica qué objetos poseen qué atributos.
+
+```{r, warning = FALSE, message = FALSE}
+library(fcaR)
+library(dplyr)
+library(magrittr)
+```
+
+En el contexto de análisis de datos de cuentas de Instagram, el FCA nos permite identificar grupos de cuentas que comparten características comunes, lo cual es valioso para detectar patrones de comportamiento, distinguir cuentas auténticas de cuentas falsas, y explorar otros aspectos relevantes.
+
+```{r}
+dataset <- read.csv("datasets/train.csv")
+```
+
+## Pre-processing
+
+Al igual que para las reglas de asociación, necesitamos hacer un pre-procesado de los datos, ya que para aplicar FCA necesitamos que nuestras variabes sean binarias.
+
+Algunas de ellas ya lo son, pero las que no lo son, tendremos que hacerles el proceso de escalado **(scaling)**.
+
+Vamos a empezar convirtiendo las variables description.length y nums.length.fullname como antes a has.description y has.nums.fullname, ya que creemos que es la información importante que contienen estas variables.
+
+```{r}
+dataset <- dataset %>%
+  mutate(has.description=as.numeric(description.length > 0)) %>%
+  mutate(has.nums.fullname=as.numeric(nums.length.fullname > 0))
+
+dataset$description.length <- NULL
+dataset$nums.length.fullname <- NULL
+```
+
+Ahora, para todas las varaibles binarias, vamos a crear su simétrica. Es decir, si tenemos la variable fake que representa que una cuenta es falsa, creamos la varaible no.fake, que representa que una cuenta no es falsa.
+
+¿Por qué simplemente no tener una variable y el valor 1 significa la afirmación de la condición y valor 0 la negación?
+
+Cuando hicimos el objeto transaccional para aplicar el algoritmo apriori del paquete arules, se nos crearon a partir de cada varaible binaria, dos variables. Por ejemplo, para fake, se nos creó fake=1 y fake=0. Es el mismo caso que tenemos ahora, solo que en aquel caso se hizo automáticamente, y ahora tenemos que hacerlo nosotros mismos.
+
+```{r}
+dataset <- dataset %>%
+  mutate(no.fake = as.numeric(!fake)) %>%
+  mutate(no.profile.pic = as.numeric(!profile.pic)) %>%
+  mutate(no.name..username = as.numeric(!name..username)) %>%
+  mutate(no.external.URL = as.numeric(!external.URL)) %>%
+  mutate(no.private = as.numeric(!private)) %>%
+  mutate(no.has.description = as.numeric(!has.description)) %>%
+  mutate(no.has.nums.fullname = as.numeric(!has.nums.fullname))
+```
+
+Esto se hace para que en nuestros conceptos, podamos tener ambos casos, la afirmación y la negación. Con el caso de fake, si solo dejásemos la variable, tendríamos conceptos en los que tenemos que se cumple "fake", pero el no cumplimiento de fake no se representaría y no podríamos formar conceptos con cuentas que no son falsas.
+
+Para las 5 variables no binarias que tenemos, las vamos a escalar a variables nominales.
+
+¿Por qué?
+
+Debido a que vamos a pasarlas a intervalos, y dado el valor de una variable, esta solo estará en uno de los intervalos, y justamente esto lo conseguidmos con las variables nominales.
+
+Para ello, antes tenemos que crear los intervalos. Vamos a usar los mismos que usamos para aplicar las reglas de asociación:
+
+-   **nums.length.username**
+    -   "0"
+    -   "(0, 0.5\]"
+    -   "(0.5, 1\]"
+
+```{r}
+dataset <- dataset %>%
+  mutate(nums.length.username=
+            ifelse(nums.length.username == 0, 
+                   "0", ifelse(nums.length.username <= 0.5, 
+                               "(0, 0.5]", "(0.5,1]")))
+```
+
+-   **fullname.words**
+    -   "0"
+    -   "\[1, 2\]"
+    -   "\> 2"
+
+```{r}
+dataset <- dataset %>%
+  mutate(fullname.words =
+            ifelse(fullname.words == 0, 
+                   "0", ifelse(fullname.words <= 2, 
+                               "[1, 2]", "> 2")))
+```
+
+-   **X.posts**
+    -   "0"
+    -   "(0, 100\]"
+    -   "\> 100"
+
+```{r}
+dataset <- dataset %>%
+  mutate(X.posts =
+            ifelse(X.posts == 0, 
+                   "0", ifelse(X.posts <= 100, 
+                               "(0, 100]", "> 100")))
+
+```
+
+-   **X.followers**
+    -   "\< 20"
+    -   "\[20, 200\]"
+    -   "\> 200"
+
+```{r}
+dataset <- dataset %>% 
+  mutate(X.followers =
+            ifelse(X.followers < 20, 
+                   "< 20", ifelse(X.followers <= 200, 
+                               "[20, 200]", "> 200")))
+```
+
+-   **X.follows**
+    -   "\< 20"
+    -   "\[20, 200\]"
+    -   "\> 200"
+
+```{r}
+dataset <- dataset %>%
+  mutate(X.follows =
+            ifelse(X.follows < 20, 
+                   "< 20", ifelse(X.follows <= 200, 
+                               "[20, 200]", "> 200")))
+```
+
+Vamos ahora a crear nuestro objeto `FormalContext` del paquete **fcaR**:
+
+```{r}
+fc <- FormalContext$new(dataset)
+```
+
+Hemos tenido que crear el objeto antes de terminar el pre-processing, ya que para las variables no binarias, es el objeto FormalContext el que nos proporciona los mecanismos de escalado.
+
+Vamosa escalar las 5 variales no binarias que hemos convertido a intervalos, mediante la función scale del objeto FormalContext:
+
+```{r}
+fc$scale(type = "nominal", "nums.length.username")
+fc$scale(type = "nominal", "X.posts")
+fc$scale(type = "nominal", "X.followers")
+fc$scale(type = "nominal", "X.follows")
+fc$scale(type = "nominal", "fullname.words")
+```
+
+Hemos pasado de tener 12 variables, a tener:
+
+```{r}
+fc$attributes
+```
+
+Con estos atributos estamos preparados para empezar a crear conceptos y estudiarlos para extraer conocimiento de los datos.
+
+## Primeros pasos
+
+Vamos a observar como hemos transformado las variables que tenían muchos valores, tomando de ejemplo, X.follows:
+
+```{r}
+plot(fc[40:60][,c(17, 18, 19)])
+```
+
+Hemos tomado las observaciones de la 40 a la 60 y las columnas que corresponden con X.follows. Como se puede apreciar, la clasificación es exclusiva, si una persona sigue a a más de 200 personas, entonces no está en "\[20, 200\]" ni en "\< 200", que es justo lo que pensamos que nos dará los mejores conceptos.
+
+Veamos el contexto formal completo:
+
+```{r}
+plot(fc)
+```
+
+Esto básicamente representa toda la información que tenemos, pero obviamente de esta forma no podemos deducir nada.
+
+Como hemos visto los atributos son todas nuestras variables
+
+```{r}
+attr_ig <- fc$attributes
+attr_ig
+```
+
+Los objetos son simplemente las observaciones, las filas de nuestro dataset, cada cuenta de Instagram que tenemos.
+
+```{r}
+obj_ig <- fc$objects
+str(obj_ig)
+```
+
+Vamos a calcular manualmente el cierre de algunos atributos, para sacar las primeras conclusiones:
+
+-   **Cierre de fake**
+
+```{r}
+S <- Set$new(attr_ig)
+S$assign(fake = 1)
+fc$intent(fc$extent(S))
+```
+
+¿Qué significa esto?
+
+Todas las cuentas que son falsas, no tienen un enlace externo en el perfil. Lo que hemos hecho es calcular el cierre de "fake", que es "fake, no.external.URL".
+
+Vamos a hacer ahora el cierre de external.URL.
+
+-   **Cierre de no.external.URL**
+
+```{r}
+S <- Set$new(attr_ig)
+S$assign(external.URL = 1)
+fc$intent(fc$extent(S))
+```
+
+Todas las cuentas que tienen un enlace externo, también tienen foto de perfil, y son reales. Vemos viendo el potencial que tiene el cierre, extra un conocimiento valioso.
+
+## Generando conceptos
+
+Vamos a generar todos los conceptos:
+
+```{r}
+fc$find_concepts()
+```
+
+Nos han salido:
+
+```{r}
+fc$concepts$size()
+```
+
+Tenemos muchos conceptos. Vamos a visualizar el primero:
+
+```{r}
+fc$concepts[1]
+```
+
+¿Qué son todos estos números?
+
+Cada número representa una cuenta de Instagram, una observación, una fila de nuestro dataset. Si nos fijamos bien, en esta lista, apareecen todos los números del 1 al 576, y es que justamente tenemos 576 observaciones en nuestro dataset. La otra parte del concepto, es {}. Esto quiere decir que todos los objetos (todas las cuentas) tienen los atributos {} (trivial). No es un concepto útil, vamos a visualizar el que se encuentra en el punto medio:
+
+```{r}
+n <- fc$concepts$size()
+indice <- floor(n/2)
+concepto_medio <- fc$concepts[indice]
+concepto_medio
+```
+
+Este concepto es más interesante, tenemos ciertas cuentas de Instagram que cumplen una serie de atributos.
+
+```{r}
+n_cuentas <- sum(concepto_medio$extents())
+attr_medio <- attr_ig[as.logical(concepto_medio$intents())]
+
+paste0("Tenemos que ", n_cuentas, " tienen los atributos:")
+attr_medio
+```
+
+Con fcaR tenemos una forma sencilla y eficiente de obtener conceptos, con los que podemos ver agrupaciones de nuestros datos, donde en nuestro caso encontramos el número de cuentas que comparten una serie de atributos.
+
+Ahora vamos a visualizar nuestros conceptos en forma de retículo, pero para ello, vamos a crear antes un subreticulo, pues tenemos demasiados conceptos.
+
+Vamos a crear el subreticulo de los conceptos con soporte mayor al 0.89, para asi quedarnos con pocos conceptos y poder visualizarlos:
+
+```{r}
+idx <- which(fc$concepts$support() > 0.8)
+sublaticce <- fc$concepts$sublattice(idx)
+```
+
+```{r}
+sublaticce$plot()
+```
+
+Dado que lo que teníamos antes es un retículo, podemos calcular el ínfimo y el supremo de nuestro subreticulo:
+
+```{r}
+fc$concepts$infimum(sublaticce)
+fc$concepts$supremum(sublaticce)
+```
+
+El ínfimo representa
+
+## Generando implicaciones
+
+Con fcaR también podemos generar implicacioens a partir de nuestros conceptos. Son reglas de asociación, pero a diferencia de arules, aquí si se generan reglas con múltiples atributos en el lado derecho.
+
+Podemos generar reglas con el comando find_implications():
+
+```{r}
+fc$find_implications()
+```
+
+Hemos generado:
+
+```{r}
+fc$implications$cardinality()
+```
+
+Vamos a ver cual es el tamaño medio la parte izquierda y derecha de nuestras reglas:
+
+```{r}
+l <- fc$implications$size()
+colMeans(l)
+```
+
+La media de la parte izquierda tiene 6.7 items. En el apartado de reglas de asociación soliamos ver reglas de entre 1, 2 o 3 items como mucho a la izquierda (salvo cuando buscamos con una longitud mínima).
+
+```{r}
+sum(colMeans(l))
+```
+
+En promedio el número de items de nuestras reglas son 8.67.
+
+Con fcaR podemos aplicar una serie de simplificaciones, para eliminar reglas redundantes. Estas son; - composition - generalization - simplification - rsimplification
+
+Vamos a aplicarlas a ver si nos eliminamos reglas redundantes
+
+```{r}
+fc$implications$apply_rules(rules = c("composition",
+                                      "generalization",
+                                      "simplification",
+                                      "rsimplification"))
+```
+
+Como podemos leer en la salida del comando, no hemos simplificado nada, lo que significa que no teníamos reglas redundantes ni que se pudiesen simplificar.
+
+Vamos a visualizar las mejores reglas ordenadas por soporte:
+
+```{r}
+indices <- order(fc$implications$support(), decreasing = TRUE)
+implicaciones_ordenadas <- fc$implications[indices]
+head(implicaciones_ordenadas)
+```
+
+Vemos algunas conclusiones como las que sacamos con arules: - Si es falsa no tiene enlace externo - Si tiene foto de perfil y más de 2 seguidores no tiene el nombre completo igual al nombre de usuario...
+
+Vamos a ver las reglas que nos llevan a que la cuenta es falsa:
+
+```{r}
+head(fc$implications$filter(rhs = "fake"))
+```
+
+Encontramos el mismo conocimiento que con arules.
+
+Con las implicaciones también podemos calcular el cierre de atributos (también podemos con los objetos, pero en este caso no nos interesa pues lo único que podemos sacar es el número de cuentas que habría en el cierre, cada cuenta no tiene nada que la haga especial o distinta de las demás).
+
+-   **profile.pic**
+
+```{r}
+S <- Set$new(attr_ig)
+S$assign(c("no.profile.pic", "no.fake"), values = 1)
+fc$implications$closure(S)
+```
+
+El cierre de no tener foto y ser una cuenta real, es: - no tener números en el nombre de usuario, ser privada, tener más de 200 seguidores, seguir a más de 200 personas, tener desripción, tener el nombre real distinto del nombre de usuario, no tener enlace externo y no tener números en el nombre real.
+
+## Conclusiones
+
+FCA es una herramienta poderosa para identificar y visualizar relaciones en conjuntos de datos, permitiendo la detección de patrones y la extracción de conocimiento valioso. FCA nos ha facilitado la diferenciación entre cuentas auténticas y falsas, identificando grupos con características comunes. Hemos necesitado realizar un trabajo de de preprocesamiento como el que hiicmos para las reglas de asociación, con lo que hemos obtenido variables binarias y nominales que hemos usado para crear nuestros conceptos.
+
+El uso de fcaR para generar conceptos y reglas de implicación muestra cómo se pueden descubrir asociaciones no triviales, proporcionando una visión profunda de los datos.
+
+Con toda la información que hemos obtenido hasta ahora, estamos listos para realizar regresión, una técnica que nos permitirá realizar predicciones sobre la veracidad o falsedad de las cuentas de Instagram.

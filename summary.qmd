@@ -1,0 +1,17 @@
+# Resumen
+
+En este libro, hemos abordado el problema de la detección de cuentas falsas de Instagram, mediante las distintas técnicas de análisis de datos que hemos estudiado en la asignatura.
+
+Mediante análisis exploratorio y visualización de datos hemos comprendido como se distribuyen y correlacionan nuestros datos, hemos podido sacar conceptos e implicaciones mediante FCA y las reglas de asociación, y hemos logrado crear un modelo de regresión capaz de predecir si una cuenta es falsa o real con una tasa de aciertos elevada.
+
+Hemos visto otras técnicas que podrían ser interesantes pero que no son aplicables o no nos darían demasiada información para nuestro caso, pero que para trabajos de este tipo con datos algo distintos podrían ser cruciales.
+
+Por último, hemos creado un predictor interactivo que aplica el modelo de regresión que hemos creado a los datos de cualquier cuenta, donde el lector puede introducir los que desee y evaluar la predicción.
+
+## Conclusión final
+
+Con este trabajo, hemos visto como es realmente aplicable esa teoría y práctica que vemos en la asignatura, que es más que simplemente matemáticas que damos por que tenemos que darlo, si no que tienen un uso real. El tema en cuestión de este año ha sido bastante interesante y lograr ver un uso directo y práctico de lo aprendido me parece increíble.
+
+Personalmente, este año he aprendido muchas cosas en la carrera que antes de comenzar el año, si me preguntaban, diría que es imposible que yo hiciese eso, y esta es una de ellas.
+
+Si me llegan a decir en enero, ¿serías capaz si te doy unos datos de cuentas de Instagram y si son falsas o no, crear un código que si le metes una cuetna te diga si es falsa o no? Sinceramente diría que eso ni si quiera se ve en mi carrera, y ahora, en mayo, he conseguido hacerlo simplemente con lo aprendido en la asignatura, estoy muy orgulloso de este trabajo y me ha parecido muy interesante e ideal para esta asignatura.

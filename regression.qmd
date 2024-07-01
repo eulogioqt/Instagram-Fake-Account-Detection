@@ -1,0 +1,643 @@
+# Regresión
+
+La regresión es una técnica estadística que nos permite entender y modelar la relación entre una variable dependiente (o de respuesta) y una o más variables independientes (o predictoras). En términos simples, nos ayuda a prever cómo cambia la variable dependiente cuando las variables independientes cambian.
+
+```{r, warning = FALSE, message = FALSE}
+library(ggplot2)
+library(magrittr)
+library(dplyr)
+```
+
+En el contexto de nuestro dataset de Instagram, la regresión puede ser extremadamente útil para:
+
+Predecir el número de seguidores: Basándonos en variables como el número de publicaciones, la cantidad de personas a las que sigue una cuenta, la longitud de la descripción, etc. Identificar cuentas falsas: Determinando si ciertos patrones en los datos se asocian con cuentas falsas. Analizar la influencia de la privacidad: Evaluar cómo la privacidad de una cuenta afecta el número de seguidores o seguidos. Análisis de Regresión Vamos a realizar diversos análisis de regresión para explorar nuestro dataset y obtener insights valiosos.
+
+```{r, message = FALSE, warning = FALSE}
+dataset <- read.csv("datasets/train.csv")
+attach(dataset)
+```
+
+## Primeros pasos
+
+Para las técnicas de regresión es importante que todas nuestras variables sean numéricas. No podemos hacer un ajuste con carácteres. Si fuese el caso, podríamos hacer de nuevo un trabajo de pre-processing, pero por suerte:
+
+```{r}
+str(dataset)
+```
+
+¡Nuestro dataset tiene todas las variables númericas! Probablemente con regresión tengamos más juego que con FCA.
+
+Aunque no todo es bueno. La variable que queremos predecir, fake, es una variable binaria, y la regresión no es lo más ideal para predecir exactamente entre dos valores.
+
+Vamos a intentar sacar el mayor conocimiento de nuestros datos y encontrar ajustes interesantes.
+
+## Primeras regresiones
+
+Aunque lo que queremos es predecir la variable "fake", es bueno antes de comenzar ver relaciones entre otras variables, y particularmente que variables se relacionan más con fake.
+
+En el análisis exploratorio, construimos una tabla que nos proporcionaba las mayores relaciones entre variables. Vamos a recuperar dicha tabla:
+
+```{r}
+threshold <- 0.4
+
+cor_table <- data.frame(as.table(cor(dataset))) %>% 
+  rename(Correlation = Freq)
+
+variables <- colnames(dataset)
+n_variables <- length(dataset)
+
+# Para que no haya repeticiones simétricas, vamos a poner la restricción de que el 
+# orden léxicográfico de una variable sea mayor (o menor) que la otra. 
+# Con un != no valdría porque habría valores filas simétricas
+cor_table %>% 
+  filter(as.character(Var1) > as.character(Var2) & abs(Correlation) > threshold) %>%
+  arrange(desc(abs(Correlation)))
+```
+
+Vemos que la mayor correlación (aunque inversa, pero eso no nos importa, lo importante es que hay relación para la regresión). El problema con el que nos encontraremos más adelante, es que estas variables son binarias.
+
+Podemos ir intuyendo que si queremos ajustar una variable a partir de una variable binaria, como dicha variable solo puede tomar dos valores, por muy complejo que sea el ajuste, solo hay dos posibles resultados. Como la variable que también queremos predecir es binaria, solo nos queda asignar un valor de la variable usada en el ajuste para un valor de la variable fake, pero obviamente esto no es un buen modelo.
+
+Vamos a intentar hacer una regresión simple entre estas dos variables.
+
+```{r}
+modelo1 <- lm(fake ~ profile.pic, data = dataset)
+summary(modelo1)
+```
+
+Obtenemos un 0.40 de R\^2 ajustado, lo que no está tan mal para la simplicidad del modelo.
+
+Los únicos dos valores que puede dar como predicción nuestro modelo son:
+
+```{r}
+unique(predict(modelo1))
+```
+
+A nosotros nos interesa un valor de 0 o un valor 1, así que podemos decir que el 0.29 es 0, por cercanía, y el 0.98 es 1. Construyamos una tabla:
+
+```{r}
+predicciones <- predict(modelo1)
+predicciones_binarizado <- ifelse(predicciones < 0.3, 0, 1)
+
+tabla <- data.frame(profile.pic=dataset$profile.pic,
+           fake=dataset$fake,
+           prediccion=predicciones,
+           prediccion_bin=predicciones_binarizado)
+
+head(tabla, 10)
+```
+
+Si observamos lo que está pasando, es que nuestro modelo de regresión (junto a la binarización), para las cuentas con foto, predice que no es falsa, y para las cuentas sin foto, predice que es falsa.
+
+Vamos a calcular el % de aciertos asumiendo lo anterior:
+
+```{r}
+total <- nrow(dataset)
+aciertos <- sum(predicciones_binarizado == dataset$fake)
+
+paste0("Hemos obtenido un ", round(100*aciertos/total,2), "% de aciertos")
+```
+
+Parece un buen resultado, ¿verdad? Pues casi un 80% de aciertos es un buen modelo... ¿no?
+
+Debemos tener en cuenta que nuestro dataset es pequeño, y que queremos un modelo riguroso, no podemos basarnos en una sola característica para predecir si una cuenta de Instagram es falsa.
+
+Si concluyesemos que el modelo anterior es muy bueno, nuestro predictor se basaría simplemente en tener foto de perfil o no. Es demasiado básico. El porcentaje de aciertos viene de que en nuestro dataset esto es un patrón que suele aparecer, pero quizá si el dataset fuese mas grande, no aparecería:
+
+```{r}
+casualidades <- sum(dataset$profile.pic == !dataset$fake)
+round(100 * casualidades / total, 2)
+```
+
+De ahí viene el porcentaje de aciertos.
+
+Y aunque el patrón siguiese dándose en un dataset más grande, es un modelo demasiado simple, no podemos ir a alguien y decirle si su cuenta es falsa o no simplemente por si tiene foto de perfil.
+
+Ya que es un ajuste bidimensional, pero si lo visualizamos, para que veamos que esto por si solo no es algo muy útil:
+
+```{r}
+ggplot(dataset, aes(x = profile.pic, y = fake, color="red")) +
+  geom_point() +
+  geom_line(y = predicciones, color ="blue") +
+  labs(title = "Regresión lineal de fake sobre profile.pic",
+       x = "profile.pic",
+       y = "fake") +
+  theme_minimal() 
+```
+
+La función lineal que nos ha creado el modelo es (donde Y es fake y X es profile.pic):
+
+```{r}
+paste0("y = ", modelo1$coefficients[2], "x + ", modelo1$coefficients[1])
+```
+
+## Preparando el terreno
+
+Ya hemos visto que predecir usando únicamente variables binarizadas no es una gran opción. También hemos visto, que dado que queremos ajustar una variable binaria (fake), los resultados que queremos son 0 o 1.
+
+Por lo que vamos a crear una serie de funciones con las que podamos binarizar nuestros resultados para probar nuestras predicciones, y también calcular valores estadísticos del modelo teniendo en cuenta esta binarización:
+
+-   **Función binarize.predictions** Simplemente dado el conjunto de predicciones, las binariza usando cierto threshold, que por defecto será 0.5:
+
+```{r}
+binarize.predictions <- function(predictions, threshold=0.5) {
+  ifelse(predictions < 0.5, 0, 1)
+}
+```
+
+-   **Función aciertos.binarized** Calcula el porcentaje de aciertos para nuestro dataset, binarizando los resultados
+
+```{r}
+aciertos.binarized <- function(predictions, real, threshold=0.5) {
+  total <- length(real)
+  aciertos <- sum(binarize.predictions(predictions) == real)
+  
+  100 * aciertos / total
+}
+```
+
+-   **Función rss.binarized** Calcula el RSS con las predicciones binarizadas
+
+```{r}
+rss.binarized <- function(model, real, threshold=0.5) {
+  sum((real - binarize.predictions(predict(model), threshold))^2)
+}
+```
+
+-   **Función rsquared.binarized** Calcula el parámetro R\^2 del modelo, pero usando las predicciones binarizadas (ya que el R\^2 que nos proporciona summary, se realiza con los valores sin binarizar, y es un valor diferente)
+
+```{r}
+rsquared.binarized <- function(model, real, threshold=0.5) {
+  rss <- rss.binarized(model, real, threshold)
+  tss <- sum((real - mean(real))^2)
+  
+  1 - (rss/tss)
+}
+```
+
+-   **Función rse.binarized** Lo mismo que con rsquared.binarized, pero para calcular RSE (residual standar error):
+
+```{r}
+rse.binarized <- function(model, real, threshold=0.5) {
+  rss <- rss.binarized(model, real, threshold)
+  n <- length(real)
+  
+  rse <- sqrt((1/(n-2))*rss) 
+  
+  return(rse)
+}
+```
+
+-   **Función fstatistic.binarized** Calcula el F-statistic para las predicciones binarizadas:
+
+```{r}
+fstatistic.binarized <- function(model, real) {
+  tss <- sum((real - mean(real))^2)
+  rss <- rss.binarized(model, real, threshold)
+
+  p <- length(model$coefficients) - 1
+  n <- length(real)
+  
+  ((tss - rss) / p) / (rss / (n - p - 1))
+}
+```
+
+## Regresiones previas
+
+Vamos a intentar ahora ajustar ahora algunas de las variables que no son binarias entre sí, a ver si encontramos alguna relación interesante.
+
+Para no probar a lo loco, vamos a coger la tabla del principio pero esta vez la vamos a construir solo con variables que no sean binarias:
+
+```{r}
+unique_values <- sapply(dataset, function(x) length(unique(x)))
+binary_vars <- names(which(unique_values == 2))
+
+cor_table %>% 
+  filter(as.character(Var1) > as.character(Var2) 
+         & !(Var1 %in% binary_vars)
+         & !(Var2 %in% binary_vars)) %>%
+  arrange(desc(abs(Correlation)))
+```
+
+Vamos a probar una regresión con el primer par de variables, para explorar como jugar con los datos, y luego pasaremos a intentar predecir la variable fake en función de todo lo demás:
+
+-   **Regresión entre nums.length.username y nums.length.fullname**
+
+Primero vamos a visualizar la nube de puntos:
+
+```{r}
+ggplot(dataset, aes(x=nums.length.username, y=nums.length.fullname)) +
+  geom_point()
+```
+
+Se aprecia como hay muchos valores en nums.length.fullname = 0 (y = 0), y algunos en nums.length.username = 0 (x = 0) pero por lo demás, parece haber una clara tendencia lineal alcista.
+
+Creamos un modelo de regresión lineal, pues salvo los valores en los ejes, parece que la nube de puntos dibuja una línea:
+
+```{r}
+modelo <- lm(nums.length.fullname ~ nums.length.username, data = dataset)
+```
+
+```{r}
+summary(modelo)
+```
+
+El R\^2 es muy malo, un 0.16. Vamos a visualizar la regresión:
+
+Veamos los valores predichos en una tabla:
+
+```{r}
+tabla <- data.frame(
+  nums.length.username=nums.length.username,
+  nums.length.fullname=nums.length.fullname,
+  prediccion=predict(modelo)
+)
+
+head(tabla, 10)
+```
+
+```{r}
+ggplot(dataset, aes(x = nums.length.username, y = nums.length.fullname, color="red")) +
+  geom_point() +
+  geom_line(aes(x = nums.length.username, y = predict(modelo), color ="blue")) +
+  labs(title = "Regresión lineal de nums.length.fullname sobre nums.length.username",
+       x = "nums.length.username",
+       y = "nums.length.fullname") +
+  theme_minimal() 
+```
+
+Vemos que la línea se ve influenciada altamente por los valores en los ejes. Se trata de las cuentas sin números en el nombre completo pero con números en el nombre de usuario y viceversa.
+
+Vamos a visualizar los gráficos que nos proporciona la función plot aplicada al modelo:
+
+```{r}
+plot(modelo)
+```
+
+La primera gráfica es simplemente un gráfico entre los residuos y los valores predichos. Vemos que R nos marca algunos valores que están muy lejanos el gráfico, estos son outliers.
+
+El segundo gráfico nos muestra un gráfico nos mostraría una linea reacta si los errores se distribuyesen de manera normal, lo que claramente no es el caso. Los outliers se desvian de dicha línea, y vemos que tenemos muchos valores que se desvian bastante, probablemente los valores de los ejes.
+
+La tercera gráfica también marca outliers.
+
+La cuarta y última muestra la distancia de Cook, que nos indica que puntos tienen una mayor influencia en la regresión. También marca los outliers.
+
+Lo que nos recomienda lo anterior es eliminar esos valores marcados, pero vamos a eliminar todos los valores de los ejes, aunque sean bastantes, para intentar encontrar una relación entre las cuentas que tienen números en el nombre de usuario y nombre real, eliminando los que no tiene números en alguno de los.
+
+Eliminamos outliers:
+
+```{r}
+dataset_modif <- dataset %>%
+  filter(nums.length.username > 0 & nums.length.fullname > 0)
+
+nrow(dataset_modif)
+```
+
+Nos hemos quedado prácticamente con el 9% de los datos, la mayoría no tienen números en ambos nombres.
+
+Vamos a realizar la predicción ahora:
+
+```{r}
+modelo <- lm(dataset_modif$nums.length.fullname ~ dataset_modif$nums.length.username, 
+             data = dataset_modif)
+```
+
+```{r}
+summary(modelo)
+```
+
+El R\^2 ha subido a 0.66, pero recordamos que hemos eliminado el 91% de los datos.
+
+Visualicemos:
+
+```{r}
+data.frame(
+  nums.length.username=dataset_modif$nums.length.username,
+  nums.length.fullname=dataset_modif$nums.length.fullname,
+  prediccion=predict(modelo)
+)
+```
+
+Y visualizamos:
+
+```{r, warning = FALSE}
+ggplot(dataset_modif, aes(
+  x = nums.length.username, 
+  y = nums.length.fullname, 
+  color="red")) +
+  geom_point() +
+  geom_line(aes(
+    x = nums.length.username, 
+    y = predict(modelo), 
+    color ="blue")) +
+  labs(title = "Regresión lineal de nums.length.fullname sobre nums.length.username",
+       x = "nums.length.username",
+       y = "nums.length.fullname") +
+  theme_minimal() 
+```
+
+El ajuste es mucho mejor que el anterior, y eso que aún tenemos algún outlier como el que se ve abajo derecha.
+
+Ya que hemos probado con estas dos variables estamos más que preparados para pasar a intentar predecir la variable importante, fake.
+
+## Regresión con fake
+
+Ya hemos explorado suficiente, vamos a por lo grande.
+
+Vamos a intentar predecir la variable fake a partir de las demás. Usando ".", podemos ajustar la variable fake respecto a todas las demás. Veamos como queda dicho modelo.
+
+```{r}
+modelo2 <- lm(fake ~ ., data = dataset)
+```
+
+```{r}
+summary(modelo2)
+```
+
+Nuestro modelo tiene un 0.6 de R\^2, un error residual relativamente pequeño y un f-statistic mayor de 79.33. No está nada mal.
+
+Vamos a ver el % de aciertos usando las funciones que creamos al principio.
+
+```{r}
+aciertos.binarized(predict(modelo2), fake)
+```
+
+!Casi un 90%¡. Parece que la regresión nos está dando buenos resultados, y eso que aún no hemos intentado mejorar el modelo.
+
+Calculemos el RSE, R\^2 Y F-statistic estádisticos para nuestro modelo binarizado:
+
+```{r}
+paste("RSE:", round(rse.binarized(modelo2, fake),4))
+paste("R2:", round(rsquared.binarized(modelo2, fake),4))
+paste("F-statistic:", round(fstatistic.binarized(modelo2, fake),2))
+```
+
+Los valores de los estádisticos son prácticamente los mismos que para el modelo sin binarizar.
+
+## Mejorando el modelo
+
+Si hacemos summary
+
+```{r}
+summary(modelo2)
+```
+
+Vemos que tenemos varias variables con un p-value bastante alto. Estas variables añaden complejidad al modelo y no aportan nada, vamos a eliminarlas (creando un nuevo modelo sin ellas). Vamos a quedarnos con las variables que tienen un p-value menor a 0.01, es decir, profile.pic, nums.length.username, name..username, description.length y external.URL.
+
+```{r}
+modelo3 <- lm(fake ~ profile.pic + nums.length.username + name..username +  description.length + external.URL, data = dataset)
+```
+
+```{r}
+summary(modelo3)
+```
+
+Vemos que el R2 ha bajado un poco pero es prácticamente el mismo, al igual que RSE, que solo ha incrementado un poco, y sin embargo, el fstatistic ha incremetnado bastante.
+
+Hemos conseguido unos resultados prácticamente idénticos, mejorando el fstatistic, y reduciendo considerablemente la complejidad del modelo.
+
+```{r}
+aciertos.binarized(predict(modelo3), fake)
+```
+
+Los aciertos son exactamente los mismos. Todas las variables que henmos eliminado no aportaban prácticamente nada.
+
+Veamos los gráficos que nos proporciona plot.
+
+```{r}
+plot(modelo3)
+```
+
+Al estar intentando predecir una variable que solo toma dos valores, los gráficos son bastante más distintos de lo normal. Podemos apreciar que hay outliers, aunque no demasiados como cuando estabamos ajustando las variables nums.length.fullname y nums.length.username.
+
+Ahora, vamos a intentar mejorar nuestro modelo añadiendo términos no lineales. Hay ciertas variables que quizá de la forma en que se nos presenta no aportan mucho a los datos, pero aplicandole alguna transformación, pueden aportar.
+
+Con solo términos lineales estamos ajustando un hiperplano de a nuestra nube de puntos de n dimensiones, pero con términos no lineales formamos figuras mas complejas que un hiper plano.
+
+Vamos a añadir más términos. Para la descripción vamos a añadir términos elevados a 2, 3 y 4. Para los followers, que antes nos salía que no era una variable relevante, vamos a hacerle el logaritmo, ya que los valores crecían exponencialmente (para poder hacerle el logaritmo, tenemos que tener cuidado, pues hay valores con 0, así que simplemente sumamos 1) y por último vamos a hacerle la raíz cuadrada a X.follows.
+
+```{r}
+modelo4 <- update(modelo3, . ~ . + 
+                    I(description.length^2) +
+                    I(description.length^3) +
+                    I(description.length^4) +
+                    I(log(X.followers+1)) +
+                    I(log(X.followers+1)^2) +
+                    I(log(X.followers+1)^3) +
+                    I(log(X.followers+1)^4) +
+                    I(log(X.followers+1)^2) +
+                    I(X.follows^0.5))
+```
+
+Son términos "extraños" que nos hemos inventado, y como vamos a ver ahora, han provocado un ajuste bueno, pero hay que tener cuidado. Podríamos añadir todas las variables que queramos con todas las modificaciones que queramos, pero esto puede provocar un sobreajuste (overfitting).
+
+El sobreajuste ocurre cuando entrenamos el modelo de forma que se adapta demasiado a los datos, sin tener ese grado de generalización que es lo que nos permite que dados nuevos datos, el modelo funcione correctamente.
+
+De hecho, este último modelo, tiene cierto grado de sobreajuste, ya que hemos añadido variables que se adaptan demasiado a los datos.
+
+Vamos a visualizar los estadísticos:
+
+```{r}
+summary(modelo4)
+```
+
+Hemos obtenido un error residual de 0.26, un R\^2 de 0.72 y un R\^2 ajustado de 0.7136 (bastante cercano a 0.72, lo que indica que no tenemos mucha complejidad innecesaria, aunque). Vemos que el F-statistic si ha disminuido, a 111.2, aunque sigue siendo bastante alto.
+
+Veamos el porcentaje de aciertos:
+
+```{r}
+aciertos <- aciertos.binarized(predict(modelo4), fake)
+paste0("Hemos obtenido un ", round(aciertos, 2), "% de aciertos")
+```
+
+Casi un 94%, nada mal, pero recordemos que estos son los mismos datos con los que hemos creado el modelo.
+
+Vamos a ver los estadísticos binarizados:
+
+```{r}
+paste("RSE:", round(rse.binarized(modelo4, fake),4))
+paste("R2:", round(rsquared.binarized(modelo4, fake),4))
+paste("F-statistic:", round(fstatistic.binarized(modelo4, fake),2))
+```
+
+Son incluso mejores, y eso que estos son los reales, ya que como explicamos, nos interesan los datos binarizados, no la predicción que es resultado directo de la regresión. Parece ser que hemos encontrado un buen modelo a pesar de que nuestra predicción es binaria.
+
+Vamos a pasar a la última fase, probar nuestros modelos.
+
+## Modelos finales
+
+A modo de resumen, estos son los 4 modelos con los que nos hemos quedado (que predicen la variable fake) y a los que les haremos pruebas:
+
+-   **modelo1**
+
+Modelo de regresión lineal básico que simplemente usaba para predecir fake, la variable binaria profile.pic:
+
+```{r}
+summary(modelo1)
+```
+
+Estadísticos con la binarización de los resultados:
+
+```{r}
+paste("RSE:", round(rse.binarized(modelo1, fake),4))
+paste("R2:", round(rsquared.binarized(modelo1, fake),4))
+paste("F-statistic:", round(fstatistic.binarized(modelo1, fake),2))
+```
+
+-   **modelo2**
+
+Modelo de regresión generalizado usando todas las variables del dataset, al que no se le ha hecho ningún estudio ni ninguna merjora:
+
+```{r}
+summary(modelo2)
+```
+
+Estadísticos con la binarización de los resultados:
+
+```{r}
+paste("RSE:", round(rse.binarized(modelo2, fake),4))
+paste("R2:", round(rsquared.binarized(modelo2, fake),4))
+paste("F-statistic:", round(fstatistic.binarized(modelo2, fake),2))
+```
+
+-   **modelo3**
+
+Es el modelo2 pero eliminando todas las variables que solo aportaban complejidad al modelo y prácticamente nada de información:
+
+```{r}
+summary(modelo3)
+```
+
+Estadísticos con la binarización de los resultados:
+
+```{r}
+paste("RSE:", round(rse.binarized(modelo3, fake),4))
+paste("R2:", round(rsquared.binarized(modelo3, fake),4))
+paste("F-statistic:", round(fstatistic.binarized(modelo3, fake),2))
+```
+
+-   **modelo4**
+
+Modelo de regresión generalizado no lineal. Resultado de añadir varaibles con logaritmos, exponentes y raices al modelo3.
+
+```{r}
+summary(modelo1)
+```
+
+Estadísticos con la binarización de los resultados:
+
+```{r}
+paste("RSE:", round(rse.binarized(modelo4, fake),4))
+paste("R2:", round(rsquared.binarized(modelo4, fake),4))
+paste("F-statistic:", round(fstatistic.binarized(modelo4, fake),2))
+```
+
+## Pruebas
+
+Hasta ahora, los porcentajes de aciertos que hemos calculado, son sobre nuestro dataset de entrenamiento, es decir, usamos unos datos para crear un modelo y luego lo probamos con los mismos datos. Esto no es realista, necesitamos otros datos para probar realmente nuestro modelo.
+
+Del sitio web de Kaggle, además del dataset "train.csv", se encuentra "test.csv". Vamos a utilizarlo para probar nuestros modelos, ya que probarlo con el mismo train.csv no es real, pues es la misma información que hemos usado para construir los modelos.
+
+Importamos el dataset
+
+```{r}
+dataset_test <- read.csv("datasets/test.csv")
+```
+
+Este dataset contiene las mismas variables que train.csv:
+
+```{r}
+colnames(dataset_test)
+```
+
+```{r}
+nrow(dataset_test)
+```
+
+Tenemos 120 observaciones, la mitad clasificadas como falsas y la otra mitad como reales. Son observaciones distintas a las del dataset train.csv.
+
+Vamos a calcular el porcentaje de aciertos en el dataset de pruebas usando cada modelo:
+
+-   **modelo1**
+
+```{r}
+predicciones <- predict(modelo1, dataset_test)
+
+aciertos_test <- aciertos.binarized(predicciones, dataset_test$fake)
+aciertos_train <- aciertos.binarized(predict(modelo1, dataset), dataset$fake)
+
+paste0("El modelo1 ha obtenido un ", round(aciertos_test, 2), 
+       "% de aciertos en el dataset de pruebas")
+```
+
+```{r, echo = FALSE}
+paste0("Mientras que en el dataset de entrenamiento obtuvo un ", round(aciertos_train, 2), "% de aciertos")
+```
+
+Este modelo depende totalmente de la foto de perfil. Es demasiado simple y como vemos con el test de pruebas ha perdido un 5% de aciertos. No es un buen modelo por su simplicidad y dependencia total en una única variable.
+
+-   **modelo2**
+
+```{r}
+predicciones <- predict(modelo2, dataset_test)
+
+aciertos_test <- aciertos.binarized(predicciones, dataset_test$fake)
+aciertos_train <- aciertos.binarized(predict(modelo2, dataset), dataset$fake)
+
+paste0("El modelo2 ha obtenido un ", round(aciertos_test, 2), 
+       "% de aciertos en el dataset de pruebas")
+```
+
+```{r, echo = FALSE}
+paste0("Mientras que en el dataset de entrenamiento obtuvo un ", round(aciertos_train, 2), "% de aciertos")
+```
+
+Resultados casi iguales. No es un mal modelo pero es mejorable, como vemos con el modelo3, ya que podemos simplificar su complejidad.
+
+-   **modelo3**
+
+```{r}
+predicciones <- predict(modelo3, dataset_test)
+
+aciertos_test <- aciertos.binarized(predicciones, dataset_test$fake)
+aciertos_train <- aciertos.binarized(predict(modelo3, dataset), dataset$fake)
+
+paste0("El modelo3 ha obtenido un ", round(aciertos_test, 2), 
+"% de aciertos en el dataset de pruebas")
+```
+
+```{r, echo = FALSE}
+paste0("Mientras que en el dataset de entrenamiento obtuvo un ", round(aciertos_train, 2), "% de aciertos")
+```
+
+Exactamente los mismos resultados que con el modelo2, lo que nos indica que la simplificación que hemos hecho respecto al modelo2 es muy buena.
+
+-   **modelo4**
+
+```{r}
+predicciones <- predict(modelo4, dataset_test)
+
+aciertos_test <- aciertos.binarized(predicciones, dataset_test$fake)
+aciertos_train <- aciertos.binarized(predict(modelo4, dataset), dataset$fake)
+
+paste0("El modelo4 ha obtenido un ", round(aciertos_test, 2), 
+       "% de aciertos en el dataset de pruebas")
+```
+
+```{r, echo = FALSE}
+paste0("Mientras que en el dataset de entrenamiento obtuvo un ", round(aciertos_train, 2), "% de aciertos")
+```
+
+Unos resultados muy buenos. Vemos que no tenemos mucho sobreajuste a pesar de que añadimos bastantes variables con exponentes y logaritmos. Es un buen modelo y el mejor de todos los que hemos hecho.
+
+## Conclusiones
+
+Hemos explorado el la regresión como técnica estadística para modelar y predecir la veracidad o falsedad de cuentas de Instagram. A lo largo del análisis, hemos hecho múltiples regresiones.
+
+Aunque la variable fake es binaria, con la regresión hemos podido aproximar su valor con cierto grado de precisión.
+
+Veíamos como el primer modelo, aunque tenía un prácticamente un 80% de aciertos, era demasiado simple y no podíamos guiarnos por algo tan simple. Luego hicimos modelos más complejos y los simplificamos, hasta llegar a uno que nos daba unos valores estadísticos relativamente buenos.
+
+El modelo4 ha resultado ser el mejor al incorporar términos no lineales y transformaciones logarítmicas y cuadráticas, con casi un 94% de aciertos en el dataset de entrenamiento. Aún así, este modelo mostró ciertos signos de sobreajuste (al bajar su f-statistic respecto al modelo3 mientras subía su R\^2). Esto destaca la importancia de equilibrar la complejidad del modelo con su capacidad de generalización.
+
+Existen otras técnicas de regresión más complejas, y otros métodos de realizar el entrenamiento, como la validación cruzada, pero en este apartado, nos hemos centrado en intentar conseguir el mejor modelo a partir de lo visto en clase.

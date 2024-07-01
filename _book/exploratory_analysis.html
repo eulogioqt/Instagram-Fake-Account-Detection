@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Detección de cuentas falsas de Instagram - 2&nbsp; Análisis exploratorio de datos</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./data_visualization.html" rel="next">
+<link href="./index.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./exploratory_analysis.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Análisis exploratorio de datos</span></a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Detección de cuentas falsas de Instagram</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introducción</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./exploratory_analysis.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Análisis exploratorio de datos</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data_visualization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Visualización de datos</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./association_rules.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Reglas de asociación</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./formal_concept_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">FCA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Regresión</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./temporal_series.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Series temporales</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./other_techniques.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Otras técnicas</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./predictor.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Predictor interactivo</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./summary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Resumen</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#exploración-inicial-del-dataset" id="toc-exploración-inicial-del-dataset" class="nav-link active" data-scroll-target="#exploración-inicial-del-dataset"><span class="header-section-number">2.1</span> Exploración inicial del dataset</a>
+  <ul class="collapse">
+  <li><a href="#estructura-del-dataset" id="toc-estructura-del-dataset" class="nav-link" data-scroll-target="#estructura-del-dataset"><span class="header-section-number">2.1.1</span> Estructura del dataset</a></li>
+  <li><a href="#valores-na" id="toc-valores-na" class="nav-link" data-scroll-target="#valores-na"><span class="header-section-number">2.1.2</span> Valores NA</a></li>
+  <li><a href="#resumen-estadístico" id="toc-resumen-estadístico" class="nav-link" data-scroll-target="#resumen-estadístico"><span class="header-section-number">2.1.3</span> Resumen estadístico</a></li>
+  </ul></li>
+  <li><a href="#gráfico-de-pares" id="toc-gráfico-de-pares" class="nav-link" data-scroll-target="#gráfico-de-pares"><span class="header-section-number">2.2</span> Gráfico de pares</a></li>
+  <li><a href="#matriz-de-correlación" id="toc-matriz-de-correlación" class="nav-link" data-scroll-target="#matriz-de-correlación"><span class="header-section-number">2.3</span> Matriz de correlación</a></li>
+  <li><a href="#variables-binarias" id="toc-variables-binarias" class="nav-link" data-scroll-target="#variables-binarias"><span class="header-section-number">2.4</span> Variables binarias</a>
+  <ul class="collapse">
+  <li><a href="#fake" id="toc-fake" class="nav-link" data-scroll-target="#fake"><span class="header-section-number">2.4.1</span> fake</a></li>
+  <li><a href="#profile.pic" id="toc-profile.pic" class="nav-link" data-scroll-target="#profile.pic"><span class="header-section-number">2.4.2</span> profile.pic</a></li>
+  <li><a href="#name..username" id="toc-name..username" class="nav-link" data-scroll-target="#name..username"><span class="header-section-number">2.4.3</span> name..username</a></li>
+  <li><a href="#external.url" id="toc-external.url" class="nav-link" data-scroll-target="#external.url"><span class="header-section-number">2.4.4</span> external.URL</a></li>
+  <li><a href="#private" id="toc-private" class="nav-link" data-scroll-target="#private"><span class="header-section-number">2.4.5</span> private</a></li>
+  </ul></li>
+  <li><a href="#variables-no-binarias" id="toc-variables-no-binarias" class="nav-link" data-scroll-target="#variables-no-binarias"><span class="header-section-number">2.5</span> Variables no binarias</a>
+  <ul class="collapse">
+  <li><a href="#fullname.words" id="toc-fullname.words" class="nav-link" data-scroll-target="#fullname.words"><span class="header-section-number">2.5.1</span> fullname.words</a></li>
+  <li><a href="#nums.length.fullname" id="toc-nums.length.fullname" class="nav-link" data-scroll-target="#nums.length.fullname"><span class="header-section-number">2.5.2</span> nums.length.fullname</a></li>
+  <li><a href="#nums.length.username" id="toc-nums.length.username" class="nav-link" data-scroll-target="#nums.length.username"><span class="header-section-number">2.5.3</span> nums.length.username</a></li>
+  <li><a href="#description.length" id="toc-description.length" class="nav-link" data-scroll-target="#description.length"><span class="header-section-number">2.5.4</span> description.length</a></li>
+  <li><a href="#x.posts" id="toc-x.posts" class="nav-link" data-scroll-target="#x.posts"><span class="header-section-number">2.5.5</span> X.posts</a></li>
+  <li><a href="#x.followers" id="toc-x.followers" class="nav-link" data-scroll-target="#x.followers"><span class="header-section-number">2.5.6</span> X.followers</a></li>
+  <li><a href="#x.follows" id="toc-x.follows" class="nav-link" data-scroll-target="#x.follows"><span class="header-section-number">2.5.7</span> X.follows</a></li>
+  </ul></li>
+  <li><a href="#relaciones-entre-variables" id="toc-relaciones-entre-variables" class="nav-link" data-scroll-target="#relaciones-entre-variables"><span class="header-section-number">2.6</span> Relaciones entre variables</a></li>
+  <li><a href="#cuestiones-generales" id="toc-cuestiones-generales" class="nav-link" data-scroll-target="#cuestiones-generales"><span class="header-section-number">2.7</span> Cuestiones generales</a></li>
+  <li><a href="#conclusiones" id="toc-conclusiones" class="nav-link" data-scroll-target="#conclusiones"><span class="header-section-number">2.8</span> Conclusiones</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Análisis exploratorio de datos</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<p>El análisis exploratorio de datos es una etapa crucial en cualquier proyecto de análisis de datos o modelado predictivo. Consiste en explorar y comprender los datos disponibles antes de aplicar cualquier técnica de modelado o inferencia. El objetivo principal del análisis exploratorio de datos es revelar patrones, tendencias, anomalías y relaciones dentro de los datos, lo que proporciona una base sólida para la toma de decisiones y la construcción de modelos.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(corrplot)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(psych)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gridExtra)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>En esta sección nos centraremos en explorar la estructura de los datos disponibles y entender la distribución y características de las variables. En el siguiente apartado, nos adentraremos en la visualización de datos para comprender mejor cómo se distribuyen y relacionan las diferentes variables.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"datasets/train.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="exploración-inicial-del-dataset" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="exploración-inicial-del-dataset"><span class="header-section-number">2.1</span> Exploración inicial del dataset</h2>
+<p>Vamos a comenzar viendo los aspectos más generales de nuestro dataset, que involucren toda la información, luego nos centraremos en aspectos más concretos.</p>
+<section id="estructura-del-dataset" class="level3" data-number="2.1.1">
+<h3 data-number="2.1.1" class="anchored" data-anchor-id="estructura-del-dataset"><span class="header-section-number">2.1.1</span> Estructura del dataset</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(dataset)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>'data.frame':   576 obs. of  12 variables:
+ $ profile.pic         : int  1 1 1 1 1 1 1 1 1 1 ...
+ $ nums.length.username: num  0.27 0 0.1 0 0 0 0 0 0 0 ...
+ $ fullname.words      : int  0 2 2 1 2 4 2 2 0 2 ...
+ $ nums.length.fullname: num  0 0 0 0 0 0 0 0 0 0 ...
+ $ name..username      : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ description.length  : int  53 44 0 82 0 81 50 0 71 40 ...
+ $ external.URL        : int  0 0 0 0 0 1 0 0 0 1 ...
+ $ private             : int  0 0 1 0 1 0 0 0 0 0 ...
+ $ X.posts             : int  32 286 13 679 6 344 16 33 72 213 ...
+ $ X.followers         : int  1000 2740 159 414 151 669987 122 1078 1824 12945 ...
+ $ X.follows           : int  955 533 98 651 126 150 177 76 2713 813 ...
+ $ fake                : int  0 0 0 0 0 0 0 0 0 0 ...</code></pre>
+</div>
+</div>
+<p>Vemos que contamos con 576 observaciones, es decir, 576 cuentas de Instagram con su clasificación y 12 variables que son precisamente los datos que tenemos de estas cuentas.</p>
+<p>Inicialmente podemos ver que todas nuestras variables son númericas, ya sean números enteros o decimales. Para el análisis de datos esto es un plus, pues los números son más manejables para la mayoría de técnicas de análisis de datos.</p>
+</section>
+<section id="valores-na" class="level3" data-number="2.1.2">
+<h3 data-number="2.1.2" class="anchored" data-anchor-id="valores-na"><span class="header-section-number">2.1.2</span> Valores NA</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(dataset, <span class="cf">function</span>(x) <span class="fu">sum</span>(<span class="fu">is.na</span>(x)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         profile.pic nums.length.username       fullname.words 
+                   0                    0                    0 
+nums.length.fullname       name..username   description.length 
+                   0                    0                    0 
+        external.URL              private              X.posts 
+                   0                    0                    0 
+         X.followers            X.follows                 fake 
+                   0                    0                    0 </code></pre>
+</div>
+</div>
+<p>Sorprendentemente no hay valores nulos, en los datasets suele haber columnas con valores NA con los que debemos tener cuidado, pero en nuestro caso, no tenemos ninguno, lo que de nuevo, nos facilitará el trabajo a lo largo de este libro.</p>
+</section>
+<section id="resumen-estadístico" class="level3" data-number="2.1.3">
+<h3 data-number="2.1.3" class="anchored" data-anchor-id="resumen-estadístico"><span class="header-section-number">2.1.3</span> Resumen estadístico</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(dataset)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  profile.pic     nums.length.username fullname.words  nums.length.fullname
+ Min.   :0.0000   Min.   :0.0000       Min.   : 0.00   Min.   :0.00000     
+ 1st Qu.:0.0000   1st Qu.:0.0000       1st Qu.: 1.00   1st Qu.:0.00000     
+ Median :1.0000   Median :0.0000       Median : 1.00   Median :0.00000     
+ Mean   :0.7014   Mean   :0.1638       Mean   : 1.46   Mean   :0.03609     
+ 3rd Qu.:1.0000   3rd Qu.:0.3100       3rd Qu.: 2.00   3rd Qu.:0.00000     
+ Max.   :1.0000   Max.   :0.9200       Max.   :12.00   Max.   :1.00000     
+ name..username    description.length  external.URL       private      
+ Min.   :0.00000   Min.   :  0.00     Min.   :0.0000   Min.   :0.0000  
+ 1st Qu.:0.00000   1st Qu.:  0.00     1st Qu.:0.0000   1st Qu.:0.0000  
+ Median :0.00000   Median :  0.00     Median :0.0000   Median :0.0000  
+ Mean   :0.03472   Mean   : 22.62     Mean   :0.1163   Mean   :0.3819  
+ 3rd Qu.:0.00000   3rd Qu.: 34.00     3rd Qu.:0.0000   3rd Qu.:1.0000  
+ Max.   :1.00000   Max.   :150.00     Max.   :1.0000   Max.   :1.0000  
+    X.posts        X.followers         X.follows           fake    
+ Min.   :   0.0   Min.   :       0   Min.   :   0.0   Min.   :0.0  
+ 1st Qu.:   0.0   1st Qu.:      39   1st Qu.:  57.5   1st Qu.:0.0  
+ Median :   9.0   Median :     150   Median : 229.5   Median :0.5  
+ Mean   : 107.5   Mean   :   85307   Mean   : 508.4   Mean   :0.5  
+ 3rd Qu.:  81.5   3rd Qu.:     716   3rd Qu.: 589.5   3rd Qu.:1.0  
+ Max.   :7389.0   Max.   :15338538   Max.   :7500.0   Max.   :1.0  </code></pre>
+</div>
+</div>
+<p>Observamos que hay algunas variables binarias, otras con pocos valores y otras con un rango amplio. Vamos a usar las funciones apply para entrar un poco más en profundidad.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>minimums <span class="ot">&lt;-</span> <span class="fu">sapply</span>(dataset, min)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>maximums <span class="ot">&lt;-</span> <span class="fu">sapply</span>(dataset, max)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>unique_values <span class="ot">&lt;-</span> <span class="fu">sapply</span>(dataset, <span class="cf">function</span>(x) <span class="fu">length</span>(<span class="fu">unique</span>(x)))</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>dataset_values <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">min=</span>minimums,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">max=</span>maximums,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">unique_values=</span>unique_values</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>dataset_values</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                     min         max unique_values
+profile.pic            0        1.00             2
+nums.length.username   0        0.92            54
+fullname.words         0       12.00             9
+nums.length.fullname   0        1.00            25
+name..username         0        1.00             2
+description.length     0      150.00           104
+external.URL           0        1.00             2
+private                0        1.00             2
+X.posts                0     7389.00           193
+X.followers            0 15338538.00           372
+X.follows              0     7500.00           400
+fake                   0        1.00             2</code></pre>
+</div>
+</div>
+<p>Identificamos fácilmente que hay 5 variables binarias, 3 no binarias con menos de 100 valores distintos y el resto con 100 o más valores distintos. Estas variables son:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>binary_vars <span class="ot">&lt;-</span> <span class="fu">rownames</span>(dataset_values <span class="sc">%&gt;%</span> <span class="fu">filter</span>(unique_values <span class="sc">==</span> <span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Variables binarias son: profile.pic, name..username, external.URL, private, fake </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>mid_vars <span class="ot">&lt;-</span> <span class="fu">rownames</span>(dataset_values <span class="sc">%&gt;%</span> <span class="fu">filter</span>(unique_values <span class="sc">&gt;</span> <span class="dv">2</span> <span class="sc">&amp;</span> unique_values <span class="sc">&lt;</span> <span class="dv">100</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Variables con entre 2 y 100: nums.length.username, fullname.words, nums.length.fullname </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>big_vars <span class="ot">&lt;-</span> <span class="fu">rownames</span>(dataset_values <span class="sc">%&gt;%</span> <span class="fu">filter</span>(unique_values <span class="sc">&gt;=</span> <span class="dv">100</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Variables con 100 o más: description.length, X.posts, X.followers, X.follows </code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="gráfico-de-pares" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="gráfico-de-pares"><span class="header-section-number">2.2</span> Gráfico de pares</h2>
+<p>Vamos a visualizar el panel de pares de variables, que nos da información de la relación entre cada par de variables.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pairs.panels</span>(dataset, <span class="at">main=</span><span class="st">"Gráfico de pares"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="exploratory_analysis_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Es un poco díficil observar algo ya que tenemos 12 variables y los gráficos se ven muy pequeños. Vamos a observar la matriz de correlación.</p>
+</section>
+<section id="matriz-de-correlación" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="matriz-de-correlación"><span class="header-section-number">2.3</span> Matriz de correlación</h2>
+<p>La matriz de correlación nos muestra la correlación entre cada par de variables. Sea M la matriz de correlación y sea (i, j) una posición de la matriz, entonces, la posición M[i, j] es la correlación entre las variables i y j.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>cor_matrix <span class="ot">&lt;-</span> <span class="fu">cor</span>(dataset)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>cor_matrix</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                     profile.pic nums.length.username fullname.words
+profile.pic           1.00000000          -0.36408701     0.21329514
+nums.length.username -0.36408701           1.00000000    -0.22547213
+fullname.words        0.21329514          -0.22547213     1.00000000
+nums.length.fullname -0.13175622           0.40856654    -0.09434799
+name..username       -0.12490287           0.05688965    -0.08296878
+description.length    0.36789194          -0.32117027     0.27252216
+external.URL          0.23672932          -0.23712479     0.19656239
+private               0.11473196          -0.06371257    -0.08907008
+X.posts               0.16957023          -0.15744211     0.07335018
+X.followers           0.06113663          -0.06278509     0.03322460
+X.follows             0.19483278          -0.17241327     0.09485496
+fake                 -0.63731535           0.58768653    -0.29879258
+                     nums.length.fullname name..username description.length
+profile.pic                   -0.13175622   -0.124902870        0.367891938
+nums.length.username           0.40856654    0.056889649       -0.321170271
+fullname.words                -0.09434799   -0.082968780        0.272522165
+nums.length.fullname           1.00000000    0.291149086       -0.117521050
+name..username                 0.29114909    1.000000000       -0.064813853
+description.length            -0.11752105   -0.064813853        1.000000000
+external.URL                  -0.08872418   -0.039232382        0.482313071
+private                       -0.03003033    0.046084001       -0.110328832
+X.posts                       -0.05771550   -0.049808246        0.144823702
+X.followers                   -0.02703471   -0.017760756        0.005929455
+X.follows                     -0.06797109   -0.009529101        0.226561422
+fake                           0.24678210    0.170694729       -0.460824593
+                     external.URL     private     X.posts  X.followers
+profile.pic            0.23672932  0.11473196  0.16957023  0.061136635
+nums.length.username  -0.23712479 -0.06371257 -0.15744211 -0.062785090
+fullname.words         0.19656239 -0.08907008  0.07335018  0.033224604
+nums.length.fullname  -0.08872418 -0.03003033 -0.05771550 -0.027034712
+name..username        -0.03923238  0.04608400 -0.04980825 -0.017760756
+description.length     0.48231307 -0.11032883  0.14482370  0.005929455
+external.URL           1.00000000 -0.16261231  0.16500846  0.027188730
+private               -0.16261231  1.00000000 -0.08749503 -0.073472710
+X.posts                0.16500846 -0.08749503  1.00000000  0.321385480
+X.followers            0.02718873 -0.07347271  0.32138548  1.000000000
+X.follows              0.14251936 -0.05754247  0.09822504 -0.011065994
+fake                  -0.36280938 -0.02858602 -0.24535515 -0.093688783
+                        X.follows        fake
+profile.pic           0.194832776 -0.63731535
+nums.length.username -0.172413275  0.58768653
+fullname.words        0.094854964 -0.29879258
+nums.length.fullname -0.067971092  0.24678210
+name..username       -0.009529101  0.17069473
+description.length    0.226561422 -0.46082459
+external.URL          0.142519361 -0.36280938
+private              -0.057542468 -0.02858602
+X.posts               0.098225040 -0.24535515
+X.followers          -0.011065994 -0.09368878
+X.follows             1.000000000 -0.22483522
+fake                 -0.224835224  1.00000000</code></pre>
+</div>
+</div>
+<p>Aquí podemos buscar cualquier par de variables y ver su correlación. Buscando un poco vemos correlaciones significativas entre profile.pic y fake, la description.length y external.URL</p>
+<p>Como hay muchos numeros y no es lo más riguroso buscar a ojo, vamos a hacer unos pequeños cálculos para encontrar todas las variables relacionadas más de un cierto <code>threshold</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>threshold <span class="ot">&lt;-</span> <span class="fl">0.4</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>cor_table <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">as.table</span>(cor_matrix)) <span class="sc">%&gt;%</span> </span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Correlation =</span> Freq)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>variables <span class="ot">&lt;-</span> <span class="fu">colnames</span>(dataset)</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>n_variables <span class="ot">&lt;-</span> <span class="fu">length</span>(dataset)</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>medium_point <span class="ot">&lt;-</span> n_variables <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Para que no haya repeticiones simétricas, vamos a poner la restricción de que el </span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="co"># orden léxicográfico de una variable sea mayor (o menor) que la otra. </span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Con un != no valdría porque habría valores filas simétricas</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>cor_table <span class="sc">%&gt;%</span> </span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">as.character</span>(Var1) <span class="sc">&gt;</span> <span class="fu">as.character</span>(Var2) <span class="sc">&amp;</span> <span class="fu">abs</span>(Correlation) <span class="sc">&gt;</span> threshold) <span class="sc">%&gt;%</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="fu">abs</span>(Correlation)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                  Var1                 Var2 Correlation
+1          profile.pic                 fake  -0.6373153
+2 nums.length.username                 fake   0.5876865
+3         external.URL   description.length   0.4823131
+4                 fake   description.length  -0.4608246
+5 nums.length.username nums.length.fullname   0.4085665</code></pre>
+</div>
+</div>
+<p>Ahora podemos sacar más información que la que habíamos visto de primeras. Hay una importante correlación entre si una cuenta es falsa y si tiene foto de perfil, el ratio de carácteres númericos en el nombre de la cuenta, la longitud de la descripción…</p>
+<p>A conitnuación vamos a pasar a un análsis más concreto, para observar en particular cada variable de nuestro dataset.</p>
+</section>
+<section id="variables-binarias" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="variables-binarias"><span class="header-section-number">2.4</span> Variables binarias</h2>
+<p>Las variables binarias solo toman dos valores (en nuestro caso todas 0 o 1) y la información que se puede extraer es distinta que el resto. Vamos a comenzar con ellas, como sabemos por nuestro análisis anterior, estás son <code>profile.pic</code>, <code>name..username</code>, <code>external.URL</code> y <code>private</code> y <code>fake</code>. Vamos a comenzar con fake ya que es la más relevante, pues es la clasificación de cada fila del dataset.</p>
+<section id="fake" class="level3" data-number="2.4.1">
+<h3 data-number="2.4.1" class="anchored" data-anchor-id="fake"><span class="header-section-number">2.4.1</span> fake</h3>
+<p>Toma el valor 1 si la cuenta es falsa, y 0 si no es falsa. Es la variable más importante que tenemos en el dataset, pues es la que tratamos de estimar, de la que queremos a partir de las otras, extraer información para poder predecir esta.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dataset<span class="sc">$</span>fake)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+  0   1 
+288 288 </code></pre>
+</div>
+</div>
+<p>Tenemos un 50 - 50 de clasificaciones, mitad de cuentas son falsas y la otra mitad no.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(dataset<span class="sc">$</span>fake)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    0.0     0.0     0.5     0.5     1.0     1.0 </code></pre>
+</div>
+</div>
+<p>La media y la mediana corroboran lo que comentabamos antes.</p>
+<p>En resumen:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>total_count <span class="ot">&lt;-</span> <span class="fu">length</span>(dataset<span class="sc">$</span>fake)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>count_fake <span class="ot">&lt;-</span> <span class="fu">sum</span>(dataset<span class="sc">$</span>fake <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>count_real <span class="ot">&lt;-</span> <span class="fu">sum</span>(dataset<span class="sc">$</span>fake <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>percent_fake <span class="ot">&lt;-</span> (count_fake <span class="sc">/</span> total_count) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>percent_real <span class="ot">&lt;-</span> (count_real <span class="sc">/</span> total_count) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Cuentas falsas: "</span>, count_fake, <span class="st">" ("</span>, <span class="fu">round</span>(percent_fake, <span class="dv">2</span>), <span class="st">"%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas falsas: 288 (50%)"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Cuentas no falsas: "</span>, count_real, <span class="st">" ("</span>, <span class="fu">round</span>(percent_real, <span class="dv">2</span>), <span class="st">"%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas no falsas: 288 (50%)"</code></pre>
+</div>
+</div>
+</section>
+<section id="profile.pic" class="level3" data-number="2.4.2">
+<h3 data-number="2.4.2" class="anchored" data-anchor-id="profile.pic"><span class="header-section-number">2.4.2</span> profile.pic</h3>
+<p>Toma el valor 1 para las cuentas con foto de perfil y un 0 para las que no tienen.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(dataset<span class="sc">$</span>profile.pic)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.0000  0.0000  1.0000  0.7014  1.0000  1.0000 </code></pre>
+</div>
+</div>
+<p>La media ya nos indica que en nuestro dataset hay más cuentas con foto de perfil que sin foto.</p>
+<p>En resumen:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas con foto de perfil: 404 (70.14%)"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas sin foto de perfil: 172 (29.86%)"</code></pre>
+</div>
+</div>
+</section>
+<section id="name..username" class="level3" data-number="2.4.3">
+<h3 data-number="2.4.3" class="anchored" data-anchor-id="name..username"><span class="header-section-number">2.4.3</span> name..username</h3>
+<p>Toma el valor 1 si el nombre de la persona es igual al username que se ha puesto en Instagram, y 0 en caso contrario.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(dataset<span class="sc">$</span>name..username)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+0.00000 0.00000 0.00000 0.03472 0.00000 1.00000 </code></pre>
+</div>
+</div>
+<p>La media nos indica que muy pocas cuentas cumplen esta condición.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>total_count <span class="ot">&lt;-</span> <span class="fu">length</span>(dataset<span class="sc">$</span>name..username)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>count_name_equals_username <span class="ot">&lt;-</span> <span class="fu">sum</span>(dataset<span class="sc">$</span>name..username <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>count_name_not_equals_username <span class="ot">&lt;-</span> <span class="fu">sum</span>(dataset<span class="sc">$</span>name..username <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>percent_name_equals_username <span class="ot">&lt;-</span> (count_name_equals_username <span class="sc">/</span> total_count) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>percent_name_not_equals_username <span class="ot">&lt;-</span> (count_name_not_equals_username <span class="sc">/</span> total_count) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Cuentas con mismo nombre y username: "</span>, count_name_equals_username, <span class="st">" ("</span>, <span class="fu">round</span>(percent_name_equals_username, <span class="dv">2</span>), <span class="st">"%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas con mismo nombre y username: 20 (3.47%)"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Cuentas con distinto nombre y username: "</span>, count_name_not_equals_username, <span class="st">" ("</span>, <span class="fu">round</span>(percent_name_not_equals_username, <span class="dv">2</span>), <span class="st">"%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas con distinto nombre y username: 556 (96.53%)"</code></pre>
+</div>
+</div>
+</section>
+<section id="external.url" class="level3" data-number="2.4.4">
+<h3 data-number="2.4.4" class="anchored" data-anchor-id="external.url"><span class="header-section-number">2.4.4</span> external.URL</h3>
+<p>Toma el valor 1 si la cuenta tiene un enlace en el perfil, y 0 si no tiene.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(dataset<span class="sc">$</span>external.URL)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.0000  0.0000  0.0000  0.1163  0.0000  1.0000 </code></pre>
+</div>
+</div>
+<p>La mediana es 0 y la media 0.11. Pocas cuentas tienen enlace en el perfil.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>total_count <span class="ot">&lt;-</span> <span class="fu">length</span>(dataset<span class="sc">$</span>external.URL)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>count_with_url <span class="ot">&lt;-</span> <span class="fu">sum</span>(dataset<span class="sc">$</span>external.URL <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>count_without_url <span class="ot">&lt;-</span> <span class="fu">sum</span>(dataset<span class="sc">$</span>external.URL <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>percent_with_url <span class="ot">&lt;-</span> (count_with_url <span class="sc">/</span> total_count) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>percent_without_url <span class="ot">&lt;-</span> (count_without_url <span class="sc">/</span> total_count) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Cuentas con enlace en el perfil: "</span>, count_with_url, <span class="st">" ("</span>, <span class="fu">round</span>(percent_with_url, <span class="dv">2</span>), <span class="st">"%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas con enlace en el perfil: 67 (11.63%)"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Cuentas sin enlace en el perfil: "</span>, count_without_url, <span class="st">" ("</span>, <span class="fu">round</span>(percent_without_url, <span class="dv">2</span>), <span class="st">"%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas sin enlace en el perfil: 509 (88.37%)"</code></pre>
+</div>
+</div>
+</section>
+<section id="private" class="level3" data-number="2.4.5">
+<h3 data-number="2.4.5" class="anchored" data-anchor-id="private"><span class="header-section-number">2.4.5</span> private</h3>
+<p>Toma el valor 1 si la cuenta es privada, y 0 si es pública.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(dataset<span class="sc">$</span>private)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.0000  0.0000  0.0000  0.3819  1.0000  1.0000 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>total_count <span class="ot">&lt;-</span> <span class="fu">length</span>(dataset<span class="sc">$</span>private)</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>count_private <span class="ot">&lt;-</span> <span class="fu">sum</span>(dataset<span class="sc">$</span>private <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>count_public <span class="ot">&lt;-</span> <span class="fu">sum</span>(dataset<span class="sc">$</span>private <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>percent_private <span class="ot">&lt;-</span> (count_private <span class="sc">/</span> total_count) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>percent_public <span class="ot">&lt;-</span> (count_public <span class="sc">/</span> total_count) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Cuentas privadas: "</span>, count_private, <span class="st">" ("</span>, <span class="fu">round</span>(percent_private, <span class="dv">2</span>), <span class="st">"%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas privadas: 220 (38.19%)"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Cuentas públicas: "</span>, count_public, <span class="st">" ("</span>, <span class="fu">round</span>(percent_public, <span class="dv">2</span>), <span class="st">"%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas públicas: 356 (61.81%)"</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="variables-no-binarias" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="variables-no-binarias"><span class="header-section-number">2.5</span> Variables no binarias</h2>
+<p>Las variables no binarias tienen más información que podemos explorar, las binarias simplemente podíamos ver como se repartían los datos y no mucho más.</p>
+<p>Las variables no binarias son:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>non_binary <span class="ot">&lt;-</span> dataset_values <span class="sc">%&gt;%</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(unique_values <span class="sc">&gt;</span> <span class="dv">2</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(unique_values)</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>non_binary</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                     min         max unique_values
+fullname.words         0       12.00             9
+nums.length.fullname   0        1.00            25
+nums.length.username   0        0.92            54
+description.length     0      150.00           104
+X.posts                0     7389.00           193
+X.followers            0 15338538.00           372
+X.follows              0     7500.00           400</code></pre>
+</div>
+</div>
+<p>Salvo <code>fullname.words</code>, todas las variables tienen un alto número de valores únicos. Vamos a empezar con esta ya que podremos hacer algún que otro gráfico distinto al resto, y seguiremos el orden ascendente del número de valores únicos.</p>
+<section id="fullname.words" class="level3" data-number="2.5.1">
+<h3 data-number="2.5.1" class="anchored" data-anchor-id="fullname.words"><span class="header-section-number">2.5.1</span> fullname.words</h3>
+<p>Representa el número de palabras en el nombre completo del usuario.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(dataset<span class="sc">$</span>fullname.words)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> int [1:576] 0 2 2 1 2 4 2 2 0 2 ...</code></pre>
+</div>
+</div>
+<p>Vemos que toma valores enteros.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(dataset<span class="sc">$</span>fullname.words)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   0.00    1.00    1.00    1.46    2.00   12.00 </code></pre>
+</div>
+</div>
+<p>La media es alrededor de la palabra y media, lo que tiene bastante sentido. Sin embargo, la mediana es tener una sola palabra para el nombre.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dataset<span class="sc">$</span>fullname.words)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+  0   1   2   3   4   5   6  10  12 
+ 57 283 187  34   7   4   2   1   1 </code></pre>
+</div>
+</div>
+<p>Tenemos bastantes cuentas sin palabras en el nombre completo, lo que es sospechoso.</p>
+<p>¿Qué tipo de cuenta tiene más de 1, 2, 3 o como mucho 4 palabras en su nombre completo? Es tan sospechoso como tener 0.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>total_count <span class="ot">&lt;-</span> <span class="fu">nrow</span>(dataset)</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>count_one_word <span class="ot">&lt;-</span> <span class="fu">sum</span>(dataset<span class="sc">$</span>fullname.words <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>percent_one_word <span class="ot">&lt;-</span> (count_one_word <span class="sc">/</span> total_count) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>count_multi_word <span class="ot">&lt;-</span> <span class="fu">sum</span>(dataset<span class="sc">$</span>fullname.words <span class="sc">&gt;</span> <span class="dv">1</span>)</span>
+<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a>percent_multi_word <span class="ot">&lt;-</span> (count_multi_word <span class="sc">/</span> total_count) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-9"><a href="#cb60-9" aria-hidden="true" tabindex="-1"></a>count_no_word <span class="ot">&lt;-</span> <span class="fu">sum</span>(dataset<span class="sc">$</span>fullname.words <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb60-10"><a href="#cb60-10" aria-hidden="true" tabindex="-1"></a>percent_no_word <span class="ot">&lt;-</span> (count_no_word <span class="sc">/</span> total_count) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb60-11"><a href="#cb60-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-12"><a href="#cb60-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Mostrar resultados</span></span>
+<span id="cb60-13"><a href="#cb60-13" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Cuentas sin nombre completo: "</span>, count_no_word, <span class="st">" ("</span>, <span class="fu">round</span>(percent_no_word, <span class="dv">2</span>), <span class="st">"%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas sin nombre completo: 57 (9.9%)"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Cuentas con nombre completo de una palabra: "</span>, count_one_word, <span class="st">" ("</span>, <span class="fu">round</span>(percent_one_word, <span class="dv">2</span>), <span class="st">"%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas con nombre completo de una palabra: 283 (49.13%)"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Cuentas con nombre de más de una palabra: "</span>, count_multi_word, <span class="st">" ("</span>, <span class="fu">round</span>(percent_multi_word, <span class="dv">2</span>), <span class="st">"%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas con nombre de más de una palabra: 236 (40.97%)"</code></pre>
+</div>
+</div>
+</section>
+<section id="nums.length.fullname" class="level3" data-number="2.5.2">
+<h3 data-number="2.5.2" class="anchored" data-anchor-id="nums.length.fullname"><span class="header-section-number">2.5.2</span> nums.length.fullname</h3>
+<p>Ratio del número de carácteres númericos en el nombre completo respecto a la longitud del nombre completo.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(dataset<span class="sc">$</span>nums.length.fullname)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> num [1:576] 0 0 0 0 0 0 0 0 0 0 ...</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dataset<span class="sc">$</span>nums.length.fullname)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+   0 0.08  0.1 0.11 0.12 0.14 0.18  0.2 0.22 0.24 0.25 0.27 0.29 0.31 0.33 0.36 
+ 518    1    1    1    2    1    2    1    3    3    4    1    1    3   11    2 
+0.38  0.4 0.43 0.44 0.46  0.5 0.57 0.89    1 
+   1    7    2    2    1    3    1    1    3 </code></pre>
+</div>
+</div>
+<p>Tenemos una gran concentración en el número 0 y vemos que la variable toma valores entre 0 y 1, de forma continua.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(dataset<span class="sc">$</span>nums.length.fullname)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+0.00000 0.00000 0.00000 0.03609 0.00000 1.00000 </code></pre>
+</div>
+</div>
+<p>Lo normal es no tener carácteres en el nombre completo (recordamos que es el nombre de la persona, no el username).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>total_count <span class="ot">&lt;-</span> <span class="fu">nrow</span>(dataset)</span>
+<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a>count_with_numbers <span class="ot">&lt;-</span> <span class="fu">sum</span>(dataset<span class="sc">$</span>nums.length.fullname <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb72-4"><a href="#cb72-4" aria-hidden="true" tabindex="-1"></a>percent_with_numbers <span class="ot">&lt;-</span> (count_with_numbers <span class="sc">/</span> total_count) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb72-5"><a href="#cb72-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb72-6"><a href="#cb72-6" aria-hidden="true" tabindex="-1"></a>count_no_numbers <span class="ot">&lt;-</span> <span class="fu">sum</span>(dataset<span class="sc">$</span>nums.length.fullname <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb72-7"><a href="#cb72-7" aria-hidden="true" tabindex="-1"></a>percent_no_numbers <span class="ot">&lt;-</span> (count_no_numbers <span class="sc">/</span> total_count) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb72-8"><a href="#cb72-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb72-9"><a href="#cb72-9" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Cuentas con números en el nombre completo: "</span>, </span>
+<span id="cb72-10"><a href="#cb72-10" aria-hidden="true" tabindex="-1"></a>       count_with_numbers, <span class="st">" ("</span>, <span class="fu">round</span>(percent_with_numbers, <span class="dv">2</span>), <span class="st">"%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas con números en el nombre completo: 58 (10.07%)"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Cuentas sin números en el nombre completo: "</span>, </span>
+<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a>       count_no_numbers, <span class="st">" ("</span>, <span class="fu">round</span>(percent_no_numbers, <span class="dv">2</span>), <span class="st">"%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas sin números en el nombre completo: 518 (89.93%)"</code></pre>
+</div>
+</div>
+</section>
+<section id="nums.length.username" class="level3" data-number="2.5.3">
+<h3 data-number="2.5.3" class="anchored" data-anchor-id="nums.length.username"><span class="header-section-number">2.5.3</span> nums.length.username</h3>
+<p>Ratio del número de carácteres númericos en el nombre de usuario respecto a la longitud del nombre de usuario.</p>
+<p>Muy parecido a la variable anterior, pero esta vez es respecto al nombre de usuario de Instagram. Probablemente haya ciertas diferencias como que será más común tener algún número en el username.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(dataset<span class="sc">$</span>nums.length.username)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> num [1:576] 0.27 0 0.1 0 0 0 0 0 0 0 ...</code></pre>
+</div>
+</div>
+<p>Toma valores entre 0 y 1, como la variable anterior.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(dataset<span class="sc">$</span>nums.length.username)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.0000  0.0000  0.0000  0.1638  0.3100  0.9200 </code></pre>
+</div>
+</div>
+<p>Se observa justamente lo que hemos comentado, es más común tener algún número en el username, respecto a los números en el nombre completo de la persona.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a>total_count <span class="ot">&lt;-</span> <span class="fu">nrow</span>(dataset)</span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb80-3"><a href="#cb80-3" aria-hidden="true" tabindex="-1"></a>count_with_numbers <span class="ot">&lt;-</span> <span class="fu">sum</span>(dataset<span class="sc">$</span>nums.length.username <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb80-4"><a href="#cb80-4" aria-hidden="true" tabindex="-1"></a>percent_with_numbers <span class="ot">&lt;-</span> (count_with_numbers <span class="sc">/</span> total_count) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb80-5"><a href="#cb80-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb80-6"><a href="#cb80-6" aria-hidden="true" tabindex="-1"></a>count_no_numbers <span class="ot">&lt;-</span> <span class="fu">sum</span>(dataset<span class="sc">$</span>nums.length.username <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb80-7"><a href="#cb80-7" aria-hidden="true" tabindex="-1"></a>percent_no_numbers <span class="ot">&lt;-</span> (count_no_numbers <span class="sc">/</span> total_count) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb80-8"><a href="#cb80-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb80-9"><a href="#cb80-9" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Cuentas con números en el nombre completo: "</span>, </span>
+<span id="cb80-10"><a href="#cb80-10" aria-hidden="true" tabindex="-1"></a>       count_with_numbers, <span class="st">" ("</span>, <span class="fu">round</span>(percent_with_numbers, <span class="dv">2</span>), <span class="st">"%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas con números en el nombre completo: 277 (48.09%)"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Cuentas sin números en el nombre completo: "</span>, </span>
+<span id="cb82-2"><a href="#cb82-2" aria-hidden="true" tabindex="-1"></a>       count_no_numbers, <span class="st">" ("</span>, <span class="fu">round</span>(percent_no_numbers, <span class="dv">2</span>), <span class="st">"%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas sin números en el nombre completo: 299 (51.91%)"</code></pre>
+</div>
+</div>
+<p>Prácticamente la mitad de usuarios tiene algún número en el nombre de usuario, mientras que en nombre completo, pocos tenían.</p>
+</section>
+<section id="description.length" class="level3" data-number="2.5.4">
+<h3 data-number="2.5.4" class="anchored" data-anchor-id="description.length"><span class="header-section-number">2.5.4</span> description.length</h3>
+<p>La longitud de la descripción de la cuenta de Instagram.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(dataset<span class="sc">$</span>description.length)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> int [1:576] 53 44 0 82 0 81 50 0 71 40 ...</code></pre>
+</div>
+</div>
+<p>Toma valores enteros, como es lógico por el significado de la variable.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(dataset<span class="sc">$</span>description.length)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   0.00    0.00    0.00   22.62   34.00  150.00 </code></pre>
+</div>
+</div>
+<p>La media es de unos 23 carácteres en la descripción, pero probablemente esté muy afectado por las cuentas sin descripción, ya que la mediana es 0.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb88"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a>count_with_description <span class="ot">&lt;-</span> <span class="fu">sum</span>(dataset<span class="sc">$</span>description.length <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb88-2"><a href="#cb88-2" aria-hidden="true" tabindex="-1"></a>percent_with_description <span class="ot">&lt;-</span> (count_with_description <span class="sc">/</span> total_count) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb88-3"><a href="#cb88-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb88-4"><a href="#cb88-4" aria-hidden="true" tabindex="-1"></a>count_no_description <span class="ot">&lt;-</span> <span class="fu">sum</span>(dataset<span class="sc">$</span>description.length <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb88-5"><a href="#cb88-5" aria-hidden="true" tabindex="-1"></a>percent_no_description <span class="ot">&lt;-</span> (count_no_description <span class="sc">/</span> total_count) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb88-6"><a href="#cb88-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb88-7"><a href="#cb88-7" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Cuentas con descripción: "</span>, </span>
+<span id="cb88-8"><a href="#cb88-8" aria-hidden="true" tabindex="-1"></a>       count_with_description, <span class="st">" ("</span>, <span class="fu">round</span>(percent_with_description, <span class="dv">2</span>), <span class="st">"%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas con descripción: 250 (43.4%)"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Cuentas sin descripción: "</span>, </span>
+<span id="cb90-2"><a href="#cb90-2" aria-hidden="true" tabindex="-1"></a>       count_no_description, <span class="st">" ("</span>, <span class="fu">round</span>(percent_no_description, <span class="dv">2</span>), <span class="st">"%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas sin descripción: 326 (56.6%)"</code></pre>
+</div>
+</div>
+<p>Hay más cuentas sin descripción que con descripción. Vamos a calcular la media sin tener en cuenta todas esas cuentas que no tienen descripción:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb92"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a>cuentas_con_descripcion <span class="ot">=</span> dataset <span class="sc">%&gt;%</span></span>
+<span id="cb92-2"><a href="#cb92-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(description.length <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb92-3"><a href="#cb92-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb92-4"><a href="#cb92-4" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"La media de carácteres en la descripción es: "</span>, <span class="fu">mean</span>(cuentas_con_descripcion<span class="sc">$</span>description.length))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "La media de carácteres en la descripción es: 52.124"</code></pre>
+</div>
+</div>
+</section>
+<section id="x.posts" class="level3" data-number="2.5.5">
+<h3 data-number="2.5.5" class="anchored" data-anchor-id="x.posts"><span class="header-section-number">2.5.5</span> X.posts</h3>
+<p>Representa el número de publicaciones que tiene una cuenta de Instagram.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(dataset<span class="sc">$</span>X.posts)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> int [1:576] 32 286 13 679 6 344 16 33 72 213 ...</code></pre>
+</div>
+</div>
+<p>De nuevo, valores enteros.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(dataset<span class="sc">$</span>X.posts)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    0.0     0.0     9.0   107.5    81.5  7389.0 </code></pre>
+</div>
+</div>
+<p>En este caso no pasa como con la descripción que la mediana era directamente 0, pero de nuevo vemos que la media es muy alta y la mediana muy baja.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb98"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a>count_with_posts <span class="ot">&lt;-</span> <span class="fu">sum</span>(dataset<span class="sc">$</span>X.posts <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb98-2"><a href="#cb98-2" aria-hidden="true" tabindex="-1"></a>count_no_posts <span class="ot">&lt;-</span> <span class="fu">sum</span>(dataset<span class="sc">$</span>X.posts <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb98-3"><a href="#cb98-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb98-4"><a href="#cb98-4" aria-hidden="true" tabindex="-1"></a>percent_with_posts <span class="ot">&lt;-</span> (count_with_posts <span class="sc">/</span> total_count) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb98-5"><a href="#cb98-5" aria-hidden="true" tabindex="-1"></a>percent_no_posts <span class="ot">&lt;-</span> (count_no_posts <span class="sc">/</span> total_count) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb98-6"><a href="#cb98-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb98-7"><a href="#cb98-7" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Cuentas con publicaciones: "</span>, count_with_posts, <span class="st">" ("</span>, <span class="fu">round</span>(percent_with_posts, <span class="dv">2</span>), <span class="st">"%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas con publicaciones: 419 (72.74%)"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb100"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Cuentas sin publicaciones: "</span>, count_no_posts, <span class="st">" ("</span>, <span class="fu">round</span>(percent_no_posts, <span class="dv">2</span>), <span class="st">"%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas sin publicaciones: 157 (27.26%)"</code></pre>
+</div>
+</div>
+<p>Tenemos muchas cuentas sin publicaciones teniendo en cuenta que Instagram se usa principalmente para publicar…</p>
+<p>Vamos a ver la media de publicaciones quitando las cuentas sin publicaciones y los outliers que tienen más de 1000 publicaciones:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb102"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a>cuentas_menos_1000_posts <span class="ot">&lt;-</span> dataset <span class="sc">%&gt;%</span></span>
+<span id="cb102-2"><a href="#cb102-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(X.posts <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;</span> X.posts <span class="sc">&lt;=</span> <span class="dv">1000</span>)</span>
+<span id="cb102-3"><a href="#cb102-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb102-4"><a href="#cb102-4" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Media: "</span>, <span class="fu">round</span>(<span class="fu">mean</span>(cuentas_menos_1000_posts<span class="sc">$</span>X.posts), <span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Media: 106.52"</code></pre>
+</div>
+</div>
+</section>
+<section id="x.followers" class="level3" data-number="2.5.6">
+<h3 data-number="2.5.6" class="anchored" data-anchor-id="x.followers"><span class="header-section-number">2.5.6</span> X.followers</h3>
+<p>Representa el número de seguidores que tiene una cuenta de Instagram.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb104"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(dataset<span class="sc">$</span>X.followers)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> int [1:576] 1000 2740 159 414 151 669987 122 1078 1824 12945 ...</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb106"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(dataset<span class="sc">$</span>X.followers)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+       0       39      150    85307      716 15338538 </code></pre>
+</div>
+</div>
+<p>Volvemos a tener una media mucho más alta que la mediana. Esta variable tiene un rango de valores muy disperso.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb108"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb108-1"><a href="#cb108-1" aria-hidden="true" tabindex="-1"></a>cuentas_con_seguidores <span class="ot">&lt;-</span> <span class="fu">sum</span>(dataset<span class="sc">$</span>X.followers <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb108-2"><a href="#cb108-2" aria-hidden="true" tabindex="-1"></a>cuentas_sin_seguidores <span class="ot">&lt;-</span> <span class="fu">sum</span>(dataset<span class="sc">$</span>X.followers <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb108-3"><a href="#cb108-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb108-4"><a href="#cb108-4" aria-hidden="true" tabindex="-1"></a>percent_con_seguidores <span class="ot">&lt;-</span> (cuentas_con_seguidores <span class="sc">/</span> total_count) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb108-5"><a href="#cb108-5" aria-hidden="true" tabindex="-1"></a>percent_sin_seguidores <span class="ot">&lt;-</span> (cuentas_sin_seguidores <span class="sc">/</span> total_count) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb108-6"><a href="#cb108-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb108-7"><a href="#cb108-7" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Cuentas con seguidores: "</span>, cuentas_con_seguidores, <span class="st">" ("</span>, <span class="fu">round</span>(percent_con_seguidores, <span class="dv">2</span>), <span class="st">"%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas con seguidores: 558 (96.88%)"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb110"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb110-1"><a href="#cb110-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Cuentas sin seguidores: "</span>, cuentas_sin_seguidores, <span class="st">" ("</span>, <span class="fu">round</span>(percent_sin_seguidores, <span class="dv">2</span>), <span class="st">"%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas sin seguidores: 18 (3.12%)"</code></pre>
+</div>
+</div>
+<p>Observamos que hay muy pocas cuentas sin seguidores.</p>
+<p>Vamos a ver la media de seguidores quitando las cuentas sin seguidores y las cuentas que tienen más de 10000 seguidores.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb112"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb112-1"><a href="#cb112-1" aria-hidden="true" tabindex="-1"></a>cuentas_filtradas_seguidores <span class="ot">&lt;-</span> dataset <span class="sc">%&gt;%</span></span>
+<span id="cb112-2"><a href="#cb112-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(X.followers <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;</span> X.followers <span class="sc">&lt;=</span> <span class="dv">10000</span>)</span>
+<span id="cb112-3"><a href="#cb112-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb112-4"><a href="#cb112-4" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Media: "</span>, <span class="fu">round</span>(<span class="fu">mean</span>(cuentas_filtradas_seguidores<span class="sc">$</span>X.followers), <span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Media: 545.35"</code></pre>
+</div>
+</div>
+</section>
+<section id="x.follows" class="level3" data-number="2.5.7">
+<h3 data-number="2.5.7" class="anchored" data-anchor-id="x.follows"><span class="header-section-number">2.5.7</span> X.follows</h3>
+<p>Representa el número de personas que sigue una cuenta de Instagram.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb114"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb114-1"><a href="#cb114-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(dataset<span class="sc">$</span>X.follows)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> int [1:576] 955 533 98 651 126 150 177 76 2713 813 ...</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb116"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb116-1"><a href="#cb116-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(dataset<span class="sc">$</span>X.follows)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    0.0    57.5   229.5   508.4   589.5  7500.0 </code></pre>
+</div>
+</div>
+<p>En este caso la media y la mediana no están tan alejadas como en los otros casos.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb118"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb118-1"><a href="#cb118-1" aria-hidden="true" tabindex="-1"></a>cuentas_con_seguidos <span class="ot">&lt;-</span> <span class="fu">sum</span>(dataset<span class="sc">$</span>X.followers <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb118-2"><a href="#cb118-2" aria-hidden="true" tabindex="-1"></a>cuentas_sin_seguidos <span class="ot">&lt;-</span> <span class="fu">sum</span>(dataset<span class="sc">$</span>X.followers <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb118-3"><a href="#cb118-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb118-4"><a href="#cb118-4" aria-hidden="true" tabindex="-1"></a>percent_con_seguidos <span class="ot">&lt;-</span> (cuentas_con_seguidores <span class="sc">/</span> total_count) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb118-5"><a href="#cb118-5" aria-hidden="true" tabindex="-1"></a>percent_sin_seguidos <span class="ot">&lt;-</span> (cuentas_sin_seguidores <span class="sc">/</span> total_count) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb118-6"><a href="#cb118-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb118-7"><a href="#cb118-7" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Cuentas con seguidos: "</span>, cuentas_con_seguidos, <span class="st">" ("</span>, <span class="fu">round</span>(percent_con_seguidos, <span class="dv">2</span>), <span class="st">"%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas con seguidos: 558 (96.88%)"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb120"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb120-1"><a href="#cb120-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Cuentas sin seguidos: "</span>, cuentas_sin_seguidos, <span class="st">" ("</span>, <span class="fu">round</span>(percent_sin_seguidos, <span class="dv">2</span>), <span class="st">"%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas sin seguidos: 18 (3.12%)"</code></pre>
+</div>
+</div>
+<p>Observamos que hay muy pocas cuentas sin seguidos. Vamos a ver si las cuentas que no siguen a nadie son las mismas que tampoco tienen seguidores:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb122"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb122-1"><a href="#cb122-1" aria-hidden="true" tabindex="-1"></a>cuentas_sin_seguidos_ni_seguidores <span class="ot">&lt;-</span> dataset <span class="sc">%&gt;%</span> </span>
+<span id="cb122-2"><a href="#cb122-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(X.followers <span class="sc">==</span> <span class="dv">0</span> <span class="sc">&amp;</span> X.follows <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb122-3"><a href="#cb122-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb122-4"><a href="#cb122-4" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(cuentas_sin_seguidos_ni_seguidores)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3</code></pre>
+</div>
+</div>
+<p>Pues resulta ser que no, solo hay 3 cuentas que no tienen ni seguidores ni seguidos.</p>
+</section>
+</section>
+<section id="relaciones-entre-variables" class="level2" data-number="2.6">
+<h2 data-number="2.6" class="anchored" data-anchor-id="relaciones-entre-variables"><span class="header-section-number">2.6</span> Relaciones entre variables</h2>
+<p>Matriz de correlación entre variables binarias y no binarias</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb124"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb124-1"><a href="#cb124-1" aria-hidden="true" tabindex="-1"></a>cor_bin_nonbin <span class="ot">&lt;-</span> <span class="fu">cor</span>(dataset[, <span class="fu">c</span>(binary_vars, <span class="fu">rownames</span>(non_binary))])</span>
+<span id="cb124-2"><a href="#cb124-2" aria-hidden="true" tabindex="-1"></a><span class="fu">corrplot</span>(cor_bin_nonbin, <span class="at">method=</span><span class="st">"circle"</span>, <span class="at">type=</span><span class="st">"upper"</span>, <span class="at">tl.col=</span><span class="st">"black"</span>, <span class="at">tl.srt=</span><span class="dv">45</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="exploratory_analysis_files/figure-html/unnamed-chunk-55-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Estadísticas descriptivas comparativas entre cuentas falsas y reales</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb125"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb125-1"><a href="#cb125-1" aria-hidden="true" tabindex="-1"></a>fake_stats <span class="ot">&lt;-</span> <span class="fu">sapply</span>(dataset[dataset<span class="sc">$</span>fake <span class="sc">==</span> <span class="dv">1</span>, <span class="fu">rownames</span>(non_binary)], </span>
+<span id="cb125-2"><a href="#cb125-2" aria-hidden="true" tabindex="-1"></a>                     <span class="cf">function</span>(x) <span class="fu">c</span>(<span class="fu">round</span>(<span class="fu">mean</span>(x), <span class="dv">2</span>), <span class="fu">median</span>(x), <span class="fu">round</span>(<span class="fu">sd</span>(x), <span class="dv">2</span>)))</span>
+<span id="cb125-3"><a href="#cb125-3" aria-hidden="true" tabindex="-1"></a>real_stats <span class="ot">&lt;-</span> <span class="fu">sapply</span>(dataset[dataset<span class="sc">$</span>fake <span class="sc">==</span> <span class="dv">0</span>, <span class="fu">rownames</span>(non_binary)], </span>
+<span id="cb125-4"><a href="#cb125-4" aria-hidden="true" tabindex="-1"></a>                     <span class="cf">function</span>(x) <span class="fu">c</span>(<span class="fu">round</span>(<span class="fu">mean</span>(x), <span class="dv">2</span>), <span class="fu">median</span>(x), <span class="fu">round</span>(<span class="fu">sd</span>(x), <span class="dv">2</span>)))</span>
+<span id="cb125-5"><a href="#cb125-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb125-6"><a href="#cb125-6" aria-hidden="true" tabindex="-1"></a>comparison_stats <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Fake =</span> fake_stats, <span class="at">Real =</span> real_stats)</span>
+<span id="cb125-7"><a href="#cb125-7" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(comparison_stats) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Media"</span>, <span class="st">"Mediana"</span>, <span class="st">"Desviación típica"</span>)</span>
+<span id="cb125-8"><a href="#cb125-8" aria-hidden="true" tabindex="-1"></a><span class="fu">t</span>(comparison_stats)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                              Media Mediana Desviación típica
+Fake.fullname.words            1.15     1.0              0.68
+Fake.nums.length.fullname      0.07     0.0              0.17
+Fake.nums.length.username      0.29     0.3              0.23
+Fake.description.length        5.26     0.0             20.29
+Fake.X.posts                   8.93     0.0             28.01
+Fake.X.followers             110.59    40.0            318.41
+Fake.X.follows               302.17    70.0            705.06
+Real.fullname.words            1.77     2.0              1.25
+Real.nums.length.fullname      0.01     0.0              0.03
+Real.nums.length.username      0.04     0.0              0.09
+Real.description.length       39.98    27.0             42.79
+Real.X.posts                 206.05    74.0            550.95
+Real.X.followers          170503.89   661.5        1282598.58
+Real.X.follows               714.60   431.0           1051.60</code></pre>
+</div>
+</div>
+<p>La tabla proporciona una comparación entre las estadísticas descriptivas de las cuentas falsas y reales en Instagram.</p>
+<p>Observamos que, en promedio, las cuentas falsas tienden a tener menos palabras en el nombre completo y una longitud de descripción más corta en comparación con las cuentas reales.</p>
+<p>Además, las cuentas falsas muestran un número significativamente menor de seguidores y personas seguidas en comparación con las cuentas reales, como indican las medias y medianas mucho más bajas en estas variables.</p>
+<p>Por otro lado, las diferencias en las desviaciones estándar sugieren una mayor variabilidad en el número de seguidores y personas seguidas para las cuentas reales en comparación con las falsas.</p>
+</section>
+<section id="cuestiones-generales" class="level2" data-number="2.7">
+<h2 data-number="2.7" class="anchored" data-anchor-id="cuestiones-generales"><span class="header-section-number">2.7</span> Cuestiones generales</h2>
+<p>Vamos a explorar una serie de cuestiones generales acerca de nuestros datos, para entender mejor como se distribuyen nuestros datos y explorar relaciones interesantes:</p>
+<ul>
+<li><strong>¿Cuál es la proporción de perfiles privados con foto de perfil?</strong></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb127"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb127-1"><a href="#cb127-1" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.table</span>(<span class="fu">table</span>(</span>
+<span id="cb127-2"><a href="#cb127-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(dataset<span class="sc">$</span>private <span class="sc">==</span> <span class="dv">1</span>, <span class="st">"Privada"</span>, <span class="st">"Publica"</span>), </span>
+<span id="cb127-3"><a href="#cb127-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(dataset<span class="sc">$</span>profile.pic <span class="sc">==</span> <span class="dv">1</span>, <span class="st">"Con foto"</span>, <span class="st">"Sin foto"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         
+            Con foto   Sin foto
+  Privada 0.29340278 0.08854167
+  Publica 0.40798611 0.21006944</code></pre>
+</div>
+</div>
+<p>Lo más común es tener una cuenta pública y con foto</p>
+<ul>
+<li><strong>¿Cuál es la media de seguidores de los perfiles falsos frente a los públicos?</strong></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb129"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb129-1"><a href="#cb129-1" aria-hidden="true" tabindex="-1"></a>medias <span class="ot">&lt;-</span> dataset <span class="sc">%&gt;%</span> </span>
+<span id="cb129-2"><a href="#cb129-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(fake) <span class="sc">%&gt;%</span> </span>
+<span id="cb129-3"><a href="#cb129-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">mean</span>(X.followers))</span>
+<span id="cb129-4"><a href="#cb129-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb129-5"><a href="#cb129-5" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb129-6"><a href="#cb129-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">Perfil=</span><span class="fu">c</span>(<span class="st">"Real"</span>, <span class="st">"Falso"</span>),</span>
+<span id="cb129-7"><a href="#cb129-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Media de seguidores"</span><span class="ot">=</span>medias<span class="sc">$</span><span class="st">`</span><span class="at">mean(X.followers)</span><span class="st">`</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Perfil Media.de.seguidores
+1   Real         170503.8854
+2  Falso            110.5868</code></pre>
+</div>
+</div>
+<ul>
+<li><strong>¿Existe una correlación entre la longitud de la descripción y la cantidad de seguidores?</strong></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb131"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb131-1"><a href="#cb131-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(<span class="fu">as.numeric</span>(dataset<span class="sc">$</span>description.length), <span class="fu">as.numeric</span>(dataset<span class="sc">$</span>X.followers))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.005929455</code></pre>
+</div>
+</div>
+<p>Parece ser que no.</p>
+<ul>
+<li><strong>¿Cuál es la media del número de publicaciones según si el perfil es privado o no?</strong></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb133"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb133-1"><a href="#cb133-1" aria-hidden="true" tabindex="-1"></a>medias <span class="ot">&lt;-</span> dataset <span class="sc">%&gt;%</span> </span>
+<span id="cb133-2"><a href="#cb133-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(private) <span class="sc">%&gt;%</span> </span>
+<span id="cb133-3"><a href="#cb133-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">mean</span>(X.posts))</span>
+<span id="cb133-4"><a href="#cb133-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb133-5"><a href="#cb133-5" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb133-6"><a href="#cb133-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">Cuenta=</span><span class="fu">c</span>(<span class="st">"Pública"</span>, <span class="st">"Privada"</span>),</span>
+<span id="cb133-7"><a href="#cb133-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Media de publicaciones"</span><span class="ot">=</span>medias<span class="sc">$</span><span class="st">`</span><span class="at">mean(X.posts)</span><span class="st">`</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Cuenta Media.de.publicaciones
+1 Pública              135.11798
+2 Privada               62.78182</code></pre>
+</div>
+</div>
+<ul>
+<li><strong>¿Cuál es la proporción de perfiles con más de 1000 seguidores falsos frente a los reales?</strong></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb135"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb135-1"><a href="#cb135-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dataset<span class="sc">$</span>fake, </span>
+<span id="cb135-2"><a href="#cb135-2" aria-hidden="true" tabindex="-1"></a>      dataset<span class="sc">$</span>X.followers <span class="sc">&gt;</span> <span class="dv">1000</span>) <span class="sc">/</span> <span class="fu">rowSums</span>(<span class="fu">table</span>(dataset<span class="sc">$</span>fake, </span>
+<span id="cb135-3"><a href="#cb135-3" aria-hidden="true" tabindex="-1"></a>                                                  dataset<span class="sc">$</span>X.followers <span class="sc">&gt;</span> <span class="dv">1000</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   
+         FALSE       TRUE
+  0 0.64236111 0.35763889
+  1 0.98263889 0.01736111</code></pre>
+</div>
+</div>
+<p>El 98.26% de las cuentas falsas tienen menos de 1000 seguidores. El 35.7% de las cuentas reales tienen más de 1000 seguidores.</p>
+<ul>
+<li><strong>¿Qué porentaje de cuentas tienen números en el nombre real, en función de perfiles falsos y reales?</strong></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb137"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb137-1"><a href="#cb137-1" aria-hidden="true" tabindex="-1"></a>medias <span class="ot">&lt;-</span> dataset <span class="sc">%&gt;%</span> </span>
+<span id="cb137-2"><a href="#cb137-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">has.nums.fullname=</span><span class="fu">as.numeric</span>(nums.length.fullname <span class="sc">&gt;</span> <span class="dv">0</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb137-3"><a href="#cb137-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(fake) <span class="sc">%&gt;%</span> </span>
+<span id="cb137-4"><a href="#cb137-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">mean</span>(has.nums.fullname))</span>
+<span id="cb137-5"><a href="#cb137-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb137-6"><a href="#cb137-6" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb137-7"><a href="#cb137-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">Cuenta=</span><span class="fu">c</span>(<span class="st">"Real"</span>, <span class="st">"Falso"</span>),</span>
+<span id="cb137-8"><a href="#cb137-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Media del ratio de números en el nombre real"</span><span class="ot">=</span>medias<span class="sc">$</span><span class="st">`</span><span class="at">mean(has.nums.fullname)</span><span class="st">`</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Cuenta Media.del.ratio.de.números.en.el.nombre.real
+1   Real                                   0.02777778
+2  Falso                                   0.17361111</code></pre>
+</div>
+</div>
+<p>El 2% de las cuentas reales tienen números en su nombre real mientras que el 17% de las cuentas falsas tienen números en el nombre real. Claramente tener números en el nombre real es algo sospechoso.</p>
+<ul>
+<li><strong>¿Cuáles son las cuentas falsas con más seguidores?</strong></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb139"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb139-1"><a href="#cb139-1" aria-hidden="true" tabindex="-1"></a>seguidores_fake <span class="ot">&lt;-</span> dataset <span class="sc">%&gt;%</span></span>
+<span id="cb139-2"><a href="#cb139-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(fake <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb139-3"><a href="#cb139-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(X.followers, fake) <span class="sc">%&gt;%</span></span>
+<span id="cb139-4"><a href="#cb139-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(X.followers))</span>
+<span id="cb139-5"><a href="#cb139-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb139-6"><a href="#cb139-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(seguidores_fake)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  X.followers fake
+1        3033    1
+2        3003    1
+3        2346    1
+4        1489    1
+5        1031    1
+6         864    1</code></pre>
+</div>
+</div>
+<p>No hay ninguna cuenta falsa con más de 3033 seguidores.</p>
+<ul>
+<li><strong>¿Cuántas cuentas reales tienen más seguidores que la cuenta falsa con más seguidores?</strong></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb141"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb141-1"><a href="#cb141-1" aria-hidden="true" tabindex="-1"></a>seguidores_real <span class="ot">&lt;-</span> dataset <span class="sc">%&gt;%</span></span>
+<span id="cb141-2"><a href="#cb141-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(fake <span class="sc">==</span> <span class="dv">0</span> <span class="sc">&amp;</span> X.followers <span class="sc">&gt;</span> seguidores_fake<span class="sc">$</span>X.followers[<span class="dv">1</span>]) <span class="sc">%&gt;%</span></span>
+<span id="cb141-3"><a href="#cb141-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(X.followers, fake) <span class="sc">%&gt;%</span></span>
+<span id="cb141-4"><a href="#cb141-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(X.followers))</span>
+<span id="cb141-5"><a href="#cb141-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb141-6"><a href="#cb141-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(seguidores_real)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  X.followers fake
+1    15338538    0
+2    12397719    0
+3     6741307    0
+4     5315651    0
+5     3896490    0
+6      890969    0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb143"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb143-1"><a href="#cb143-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Hay "</span>, <span class="fu">nrow</span>(seguidores_real), <span class="st">" cuentas reales con más de "</span>, seguidores_fake<span class="sc">$</span>X.followers[<span class="dv">1</span>], <span class="st">" seguidores"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Hay 51 cuentas reales con más de 3033 seguidores"</code></pre>
+</div>
+</div>
+<p>Interesante, el 9% del dataset se podría directamente clasificar como cuenta real, al tener más seguidores que la cuenta falsa con más seguidores.</p>
+</section>
+<section id="conclusiones" class="level2" data-number="2.8">
+<h2 data-number="2.8" class="anchored" data-anchor-id="conclusiones"><span class="header-section-number">2.8</span> Conclusiones</h2>
+<p>Con este análisis exploratorio hemos podido entender mejor la naturaleza de nuestros datos, entendiendo mejor la distribución de los mismos y pudiendo ver las primeras relaciones entre distintas variables.</p>
+<p>El carácter númerico de nuestros datos nos permitirá que técnicas como la regresión lineal nos puedan dar buenos resultados, además de que, como hemos visto, hay ciertas relaciones clave entre distintas variables que podremos explotar.</p>
+<p>Un buen análisis exploratorio es muy importante y puede marcar el desarrollo del estudio de nuestros datos. Hemos obtenido un conocimiento inicial que nos vendrá muy bien cuando comencemos a aplicar las primeras técnicas de análisis de datos.</p>
+<p>En el siguiente apratado, visualización de datos, vamos a visualizar algunos de los puntos que hemos tratado en este análisis exploratorio, para poder hacernos un modelo mental aún más cercano a los datos.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./index.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introducción</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./data_visualization.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Visualización de datos</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>

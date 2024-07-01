@@ -1,0 +1,568 @@
+# Reglas de asociación
+
+El análisis de reglas de asociación es una técnica fundamental en el campo de la minería de datos y el aprendizaje automático. Se utiliza para descubrir patrones interesantes y relaciones ocultas entre variables en conjuntos de datos. En particular, las reglas de asociación son útiles para identificar asociaciones frecuentes entre diferentes elementos en una base de datos transaccional.
+
+En este trabajo, exploraremos el uso de reglas de asociación para el análisis de cuentas de Instagram. Utilizaremos el paquete `arules` en R para realizar este análisis. Nuestro conjunto de datos contiene una variedad de características de las cuentas de Instagram, como el número de seguidores, el número de publicaciones, si la cuenta es privada o no, entre otros.
+
+A lo largo de este análisis, exploraremos cómo las diferentes características de las cuentas de Instagram están asociadas entre sí, identificando reglas de asociación significativas que nos ayuden a comprender mejor el ecosistema de esta red social.
+
+```{r, warning = FALSE, message = FALSE}
+library(arules)
+library(dplyr)
+library(magrittr)
+```
+
+```{r}
+dataset <- read.csv("datasets/train.csv")
+```
+
+Antes de ponernos manos a la obra, tenemos que saber que arules no se lleva bien con las variables con un gran número de valores. Es más, solo se lleva bien con las binarias.
+
+En nuestro dataset, hemos visto en el análisis exploratorio que hay 5 variables binarias (bien para arules) y las demás no lo son. Por suerte, gracias a los conocimientos que hemso adquirido durante la asignatura, sabemos que esto tiene solución.
+
+Comprendiendo bien el significado de las variables y aplicando técnicas de discretización y agrupación, podemos convertir nuestras variables númericas a directamente binarias, o con pocos valores, y las que tengan pocos valores, podemos transformarlas a variables binarias.
+
+Vamos a realizar un buen trabajo de pre-processing para este apartado, así nuestras reglas serán potentes y tendrán un conocimiento importante:
+
+## Pre-processing
+
+Recordamos del apartado de análisis exploratorio que teníamos:
+
+-   **Variables binarias**:
+    -   profile.pic
+    -   name..username
+    -   external.URL
+    -   private
+    -   fake
+-   **Variables no binarias**:
+    -   nums.length.username
+    -   fullname.words
+    -   nums.length.fullname
+    -   description.length
+    -   X.posts
+    -   X.followers
+    -   X.follows
+
+### Variables binarias
+
+Las añadimos directamente al dataset modificado que vamos a ir construyendo
+
+```{r}
+datarules <- transmute(dataset, 
+                       profile.pic=profile.pic, 
+                       name..username=name..username,
+                       external.URL=external.URL,
+                       private=private,
+                       fake=fake)
+```
+
+### Variables no binarias
+
+Para las variables no binarias, podemos tener distintos puntos de vista, así que vamos a ir viendo cada variable:
+
+#### nums.length.username
+
+El ratio de números en el nombre de usuario de la cuenta es díficilmente binarizable, ya que no es trivial donde poner el punto medio. En el nombre de persona si resulta extraño tener números, pero en el nombre de usuario puede ser normal, no tiene porque estar relacionado directamente con que la cuenta sea falsa.
+
+Podríamos binarizar simplemente en "tiene números o no tiene números", ya que como vimos en el análisis exploratorio, teníamos prácticamente un 50-50, pero eso no exprimiría todo el conocimiento de los datos, pues lo que viene a representar esta variable es el ratio de carácteres númericos sobre la longitud del nombre.
+
+Vamos a discretizar en 3 categorías:
+
+-   "0"
+-   "(0, 0.5\]"
+-   "(0.5, 1\]"
+
+```{r}
+lu_discretize <- transmute(dataset, 
+          nums.length.username=
+            ifelse(nums.length.username == 0, 
+                   "0", ifelse(nums.length.username <= 0.5, 
+                               "(0, 0.5]", "(0.5, 1]")))
+
+datarules <- mutate(datarules, 
+       nums.length.username=lu_discretize$nums.length.username)
+```
+
+#### nums.length.fullname
+
+Para esta variable, si vamos a binarizar, ya que no es lo normal tener un número en el nombre completo. Pondremos un 0 a las cuenas que no tengan números en el nombre completo y un 1 a las que si tengan,
+
+```{r}
+lfn_binary <- transmute(dataset, 
+                        nums.length.fullname=
+                          as.numeric(nums.length.fullname!=0))
+
+datarules <- mutate(datarules, 
+       has.nums.fullname=lfn_binary$nums.length.fullname)
+```
+
+#### fullname.words
+
+Para esta variable vamos a tomar una decisión que quizá no guste a todos los lectores, pero creemos que dará los mejores resultados (recordamos que esta variable representa el número de palabras en el nombre completo)
+
+```{r}
+table(dataset$fullname.words)
+```
+
+Tener 0 palabras en el nombre no es lo normal, tener entre 1 y 2, lo es, tener 3 o más tampoco es normal. Esto obviamente subjetivo y está basado en la opinión subjetiva del escritor de este libro en base a su experiencia en el uso de Instagram.
+
+Vamos a categorizar esta varaible en 3 rangos:
+
+-   "0"
+-   "\[1, 2\]"
+-   "\> 2"
+
+```{r}
+fnw_discretize <- transmute(dataset, 
+         fullname.words =
+            ifelse(fullname.words == 0, 
+                   "0", ifelse(fullname.words <= 2, 
+                               "[1, 2]", "> 2")))
+
+datarules <- mutate(datarules, 
+       fullname.words=fnw_discretize$fullname.words)
+```
+
+#### description.length
+
+Vamos a binarizar esta variable, en el análisis exploratorio vimos que había mas cuentas sin descripción que con descripción y esto puede ser interesante.
+
+```{r}
+dl_binary <- transmute(dataset, 
+                        description.length=
+                          as.numeric(description.length!=0))
+
+datarules <- mutate(datarules, 
+       has.description=dl_binary$description.length)
+```
+
+#### X.posts
+
+Para esta variable pasaremos a 3 categorías, ya que creemos que dividen bien el conjunto de valores:
+
+```{r, echo = FALSE}
+paste0("Cuentas sin publicaciones: ", 
+       sum(dataset$X.posts == 0))
+paste0("Cuentas con entre 0 y 100 publicaciones: ", 
+       sum(dataset$X.posts > 0 & dataset$X.posts <= 100))
+paste0("Cuentas con más de 100 publicaciones: ", 
+       sum(dataset$X.posts >= 0))
+```
+
+Por tanto estas categorías son:
+
+-   "0"
+-   "(0, 100\]"
+-   "\> 100"
+
+```{r}
+p_discretize <- transmute(dataset, 
+         X.posts =
+            ifelse(X.posts == 0, 
+                   "0", ifelse(X.posts <= 100, 
+                               "(0, 100]", paste0("> 100"))))
+
+datarules <- mutate(datarules, 
+       X.posts=p_discretize$X.posts)
+```
+
+#### X.followers
+
+Vamos a dividir de nuevo en 3 categorías que hemos considerado:
+
+```{r, echo = FALSE}
+paste0("Cuentas con menos de 20 seguidores: ", 
+       sum(dataset$X.followers < 20))
+paste0("Cuentas con entre 20 y 200 seguidores: ", 
+       sum(dataset$X.followers >= 20 & dataset$X.followers <= 200))
+paste0("Cuentas con más de 200 seguidores: ", 
+       sum(dataset$X.followers > 200))
+```
+
+Por tanto estas categorías son:
+
+-   "\< 20"
+-   "\[20, 200\]"
+-   "\> 200"
+
+```{r}
+fwrs_discretize <- transmute(dataset, 
+         X.followers =
+            ifelse(X.followers < 20, 
+                   "< 20", ifelse(X.followers <= 200, 
+                               "[20, 200]", paste0("> 200"))))
+
+datarules <- mutate(datarules, 
+       X.followers=fwrs_discretize$X.followers)
+```
+
+#### X.follows
+
+Para los seguidos vamos a dividir en las mismas categorías que para los seguidores:
+
+```{r, echo = FALSE}
+paste0("Cuentas con menos de 20 seguidos: ", 
+       sum(dataset$X.follows < 20))
+paste0("Cuentas con entre 20 y 200 seguidos: ", 
+       sum(dataset$X.follows >= 20 & dataset$X.follows <= 200))
+paste0("Cuentas con más de 200 seguidos: ", 
+       sum(dataset$X.follows > 200))
+```
+
+Por tanto estas categorías son:
+
+-   "\< 20"
+-   "\[20, 200\]"
+-   "\> 200"
+
+```{r}
+fws_discretize <- transmute(dataset, 
+         X.follows =
+            ifelse(X.follows < 20, 
+                   "< 20", ifelse(X.follows <= 200, 
+                               "[20, 200]", paste0("> 200"))))
+
+datarules <- mutate(datarules, 
+       X.follows=fws_discretize$X.follows)
+```
+
+```{r, echo = FALSE}
+# Simplemente para poner la columna fake al final
+
+datarules <- datarules %>%
+  select(-fake, fake)
+```
+
+### Resultados del pre-processing
+
+Por tanto, después de nuestro preprocessing, nos quedan como variables de nuestro dataset:
+
+-   **profile.pic**
+    -   Variable binaria que toma el valor 1 si la cuenta tiene foto de perfil, 0 si no tiene.
+-   **name..username**
+    -   Variable binaria que toma el valor 1 si el nombre completo de la persona y el de usuario es el mismo, 0 si no.
+-   **external.URL**
+    -   Variable binaria que toma el valor 1 si la cuenta tiene un enlace puesto en su perfil, 0 si no.
+-   **private**
+    -   Variable binaria que toma el valor 1 si la cuenta es privada, 0 si es pública.
+-   **nums.length.username**
+    -   Variable trinaria que toma los valores:
+        -   "0" si no tiene números en el nombre de usuario.
+        -   "(0, 0.5\]" si el ratio de números es mayor a 0 y menor o igual a 0.5.
+        -   "(0.5, 1\]" si el ratio de números es mayor a 0.5 y menor o igual a 1.
+-   **has.nums.fullname**
+    -   Variable binaria que toma el valor 1 si el nombre completo contiene números, 0 si no contiene.
+-   **fullname.words**
+    -   Variable categórica que toma los valores:
+        -   "0" si el nombre completo no tiene palabras.
+        -   "\[1, 2\]" si el nombre completo tiene entre 1 y 2 palabras.
+        -   "\> 2" si el nombre completo tiene más de 2 palabras.
+-   **has.description**
+    -   Variable binaria que toma el valor 1 si la cuenta tiene una descripción, 0 si no tiene.
+-   **X.posts**
+    -   Variable categórica que toma los valores:
+        -   "0" si la cuenta no tiene publicaciones.
+        -   "(0, 100\]" si la cuenta tiene entre 1 y 100 publicaciones.
+        -   "\> 100" si la cuenta tiene más de 100 publicaciones.
+-   **X.followers**
+    -   Variable categórica que toma los valores:
+        -   "\< 20" si la cuenta tiene menos de 20 seguidores.
+        -   "\[20, 200\]" si la cuenta tiene entre 20 y 200 seguidores.
+        -   "\> 200" si la cuenta tiene más de 200 seguidores.
+-   **X.follows**
+    -   Variable categórica que toma los valores:
+        -   "\< 20" si la cuenta sigue a menos de 20 cuentas.
+        -   "\[20, 200\]" si la cuenta sigue a entre 20 y 200 cuentas.
+        -   "\> 200" si la cuenta sigue a más de 200 cuentas.
+-   **fake**
+    -   Variable binaria que toma el valor 1 si la cuenta es falsa, 0 si no lo es.
+
+Con este nuevo dataset binarizado y discretizado, estamos listos para proceder al análisis de reglas de asociación utilizando el paquete `arules` en R. Este preprocesamiento nos asegura que las variables están en un formato adecuado para el análisis, lo que facilitará la identificación de patrones y asociaciones significativas.
+
+## Generando reglas
+
+Nuestro dataset ha quedado así:
+
+```{r, echo=FALSE}
+str(datarules)
+```
+
+Ahora arules puede generar las reglas fácilmente a partir de este dataset usando el algoritmo apriori. Directamente se podría aplicar apriori, pero lo suyo es convertir el dataset a un objeto transaccional primero.
+
+### Objeto transaccional
+
+Antes de ello, para que la conversion se haga bien, tenemos que poner nuestras variables binarias como variables de tipo factor, si no la conversión a objeto transaccional no se hará bien:
+
+```{r}
+datarules$profile.pic <- as.factor(datarules$profile.pic)
+datarules$external.URL <- as.factor(datarules$external.URL)
+datarules$name..username <- as.factor(datarules$name..username)
+datarules$private <- as.factor(datarules$private)
+datarules$has.nums.fullname <- as.factor(datarules$has.nums.fullname)
+datarules$has.description <- as.factor(datarules$has.description)
+datarules$fake <- as.factor(datarules$fake)
+```
+
+Ahora si, converitmos:
+
+```{r, warning = FALSE}
+Tdatarules <- as(datarules, "transactions")
+Tdatarules@itemInfo$labels
+```
+
+Como vemos, la conversión ha hecho justamente lo que queríamos. Por ejemplo, la variable X.posts, que le dimos tres valores distintos, se han convertido en 3 variables, que cada una de ellas es binaria. Es una técnica que podríamos haber hecho a mano, pero que ya que el comando as(..., "transactions") lo hace por nosotros, no está mal aprovecharlo. Ahora tenemos 29 variables.
+
+### Apriori
+
+```{r}
+rules <- apriori(Tdatarules, parameter = list(conf=0.1, supp=0.2, target="rules"))
+length(rules)
+```
+
+El hecho de haber usado un soporte de 0.05 y 0.1 ha sido nuestra elección para filtrar entre las miles de reglas que hay si no ponemos un límite. El uso de "target = rules" no es necesario, pero es para recordar que estamos buscando reglas. También se pueden buscar otras cosas como los conjuntos de items más frequentes.
+
+Vamos a continuar filtrando estas reglas, para quedarnos con las mejores. Primero vamos a eliminar las reglas redundantes.
+
+```{r}
+indices_no_redundantes <- which(!is.redundant(rules))
+rules <- rules[indices_no_redundantes]
+inspect(head(rules))
+```
+
+Y vamos a quedarnos solo con las significativas con el método de fisher:
+
+```{r}
+indices_significativos <- is.significant(rules, method="fisher")
+rules <- rules[indices_significativos]
+```
+
+De esta manera nos hemos quedado con muchas menos reglas, pero con mucha mas relevancia. No sirven de nada miles de reglas si luego ni si quiera podemos trabajar con ellas.
+
+### Reglas que inducen cuenta falsa
+
+Lo que nos interesa son las reglas que nos lleven a que la cuenta es fake, vamos a observar estas:
+
+```{r}
+reglas_fake <- subset(rules, rhs %in% "fake=1")
+```
+
+```{r, echo = FALSE}
+paste0("Tenemos ", length(reglas_fake), " reglas que nos llevan a que la cuenta es falsa.")
+```
+
+Vamos a observar las 5 mejores reglas ordenadas por lift:
+
+```{r}
+reglas_fake_lift <- sort(reglas_fake, by="lift")
+inspect(reglas_fake_lift[1:5])
+```
+
+Por primera vez en lo que llevamos de libro hemos obtenido un conocimiento interesante para la detección de cuentas falsas de Instagram.
+
+La primera regla, por ejemplo, nos está diciendo que con una confianza del 100% en nuestro dataset, las cuentas que no tienen foto de perfil ni posts, son falsas.
+
+Lo mismo con las siguientes reglas que tienen 100% de confianza: - Las cuentas sin foto de perfil ni descripción, son falsas - Las cuentas sin foto de perfil y que son públicas son falsas
+
+Obviamente esto no significan que cualquier cuenta de Instagram que encontremos en Internet es falsa si cumple dichas condiciones, si no que en nuestro dataset siempre es así, y nuestro dataset no es demasiado grande. Necesitaríamos un dataset mucho más grande para poder afirmar esto para un caso general, pero ya son conclusiones interesantes.
+
+También vemos que la quinta regla nos dice que casi siempre que una cuenta no tiene foto de perfil, es falsa. Por ello no podemos hacer caso a lo que dicen las reglas sin más, tenemos que ver más opciones y usar más técnicas de análisis de datos, pero como primeros conocimientos, es un buen resultado.
+
+Otra cosa a tener en cuenta es el soporte de las reglas. Vamos a ver que dicen las reglas con más soporte:
+
+Mejores reglas ordenadas por soporte:
+
+```{r}
+reglas_fake_support <- sort(reglas_fake, by="support")
+inspect(reglas_fake_support[1:5])
+```
+
+Más soporte significa que esos patrones se dan mas veces en el dataset, pero sin tener en cuenta la confianza de estas reglas, no sirve de nada. Por ejemplo, la primera regla nos dice que si una cuenta no tiene enlace externo, entonces es falsa, y se da el 50% de las veces en nuestro dataset. Pero la confianza es solo del 56%. No es bueno fiarse simplemente de esta regla.
+
+En vez de buscar reglas tan simples y generales como "dada una sola cosa entonces la cuenta es fake" podemos buscar reglas que tengan a la izquierda varios items, lo que hará que el soporte sea más bajo, pero puede que nos de reglas mas fiables.
+
+Que una cuenta sea fake no va a depender únicamente de que no tenga foto de perfil o de que no tenga descripción, si no que probablemente cada condición tenga cierto peso y no sea tan sencillo.
+
+Por todo esto no podemos fiarnos solamente del soporte de la regla, y tenemos que mirar también la confianza. O mejor aún, el lift.
+
+### Reglas que inducen cuenta real
+
+Antes de buscar reglas con más items en la parte izquierda, vamos a ver las reglas que nos llevan a que la cuenta no es falsa.
+
+```{r}
+reglas_reales <- subset(rules, rhs %in% "fake=0")
+```
+
+```{r, echo = FALSE}
+paste0("Tenemos ", length(reglas_reales), " reglas que nos llevan a que la cuenta es real.")
+```
+
+Vamos a ver las reglas con mayor lift:
+
+```{r}
+reglas_reales_lift <- sort(reglas_reales, by="lift")
+inspect(reglas_reales_lift[1:5])
+```
+
+Son bastantes interesantes y precisamente tienen el componente que comentabamos antes. No son reglas tan generales como "si tiene foto de perfil la cuenta es real", si no que tiene en cuenta mucho mos detalles, como or ejemplo la segunda regla. Con un 97.85% de confianza, si la cuenta tiene foto de perfil, el nombre real y el de usuario son distintos, tiene entre 1 y 2 palabras en el nombre real y tiene descripción, entonces, es real.
+
+Estas reglas son muy interesantes y nos dan pistas y conocimiento sobre que elementos son claves a la hora de ver si una cuenta es falsa o no.
+
+### Reglas con más de 6 items
+
+Vamos ahora a buscar reglas que tengan al menos 6 items en total, (con la idea de que tengan 5 en la parte izquierda y 1 en la derecha), para ver que tipo de reglas podemos conseguir.
+
+```{r}
+big_rules <- apriori(Tdatarules, parameter = 
+                       list(conf=0.1, supp=0.2, minlen=6, target="rules"))
+```
+
+Eliminamos las reglas redundantes
+
+```{r}
+indices_no_redundantes <- which(!is.redundant(big_rules))
+big_rules <- big_rules[indices_no_redundantes]
+```
+
+Y nos quedamos con las significativas
+
+```{r}
+indices_significativos <- is.significant(big_rules, method="fisher")
+big_rules <- big_rules[indices_significativos]
+```
+
+Veamos las reglas que nos llevan a que la cuenta es falsa:
+
+```{r}
+big_reglas_fake <- subset(big_rules, rhs %in% "fake=1")
+```
+
+```{r, echo = FALSE}
+paste0("Tenemos ", length(big_reglas_fake), " reglas con 6 o más items que nos llevan a que la cuenta es falsa.")
+```
+
+Las 5 más importantes ordenadas por lift:
+
+```{r}
+big_reglas_fake_lift <- sort(big_reglas_fake, by="lift")
+inspect(big_reglas_fake_lift[1:3])
+```
+
+Estamos viendo patrones que creíamos que no se daban en las cuentas falsas, como por ejemplo, que cuentas con 1 o 2 palabras en el nombre completo también pueden llevar a una cuenta falsa, y sin números en el nombre completo, con el nombre completo distinto del nombre de usuario...
+
+Esto nos indica que detectar una cuenta falsa no es tan fácil como buscar lo que pensamos que no es normal, si no que es más complejo.
+
+### Reglas entre otros atributos
+
+Ahora vamos a buscar reglas entre los distintos atributos del dataset, que no tengan nada que ver con la clasificación de si la cuenta es falsa o no, con la idea de encontrar reglas que nos permitan derivar unos atributos a partir de otros. Usaremos las reglas generadas y almacenadas en la variable **rules**.
+
+Vamos a filtrar de forma que la regla no contenga nada referente a la variable fake, ni a la izquierda ni a la derecha. Vamos a filtrar también por reglas que tengan al menos 0.8 de confianza:
+
+```{r}
+rules_sin_fake <- subset(rules, 
+                              !(rhs %pin% "fake=") & 
+                              !(lhs %pin% "fake=") &
+                              confidence > 0.8)
+paste("Tenemos", length(rules_sin_fake), "reglas con confidence > 0.8 
+      y sin la variable fake")
+```
+
+Ordenamos por lift:
+
+```{r}
+rules_sin_fake_confidence <- sort(rules_sin_fake, by="lift")
+inspect(rules_sin_fake_confidence[1:4])
+```
+
+Vemos relaciones interesantes:
+
+-   Cuentas sin descripción ni publicaciones, no tienen foto de perfil
+-   Cuentas con más de 100 publicaciones, tienen más de 200 seguidores
+-   Cuentas con foto de perfil, sin numeros en el nombre de usuario, con un nombre real con 1 o 2 palabras y más de 200 personas seguidas, tienen más de 200 seguidores
+
+Estamos viendo que nuestros datos tienen relaciones entre sí, algunas más o menos lógicas, y que hay ciertas cosas que nos dan pistas sobre si una cuenta es falsa o no.
+
+### Conjuntos de items frecuentes
+
+Por último, vamos a buscar los conjuntos de items más frecuentes en nuestro dataset. Apriori, además de conseguirnos reglas, también nos permite conseguir los **frequent itemsets**
+
+```{r}
+items <- apriori(Tdatarules, parameter = list(
+  supp = 0.2, 
+  conf = 0.3, 
+  target="frequent itemsets"))
+```
+
+Vamos a ver los más frecuentes (ordenados por soporte)
+
+```{r}
+frequent_items <- sort(items, by="support")
+inspect(head(frequent_items))
+```
+
+Observamos que lo más común en nuestro dataset es no tener el nombre de usuario igual al nombre real, con un 96.52% de veces, no tener números en el nombre real, no tener enlace externo...
+
+Vamos a visualizarlo mediante el objeto transaccional. Veamos los 10 items más frecuentes:
+
+```{r}
+itemFrequencyPlot(Tdatarules, topN = 10)
+```
+
+## Visualización con arulesViz
+
+arulesViz es una herramienta para visualizar y comprender las reglas de asociación generadas con arules en R. Permite representar gráficamente las relaciones entre elementos en nuestros datos, facilitando la identificación de patrones complejos. 
+
+Con arulesViz, podemos visualizar las reglas como grafos o diagramas de coordenadas paralelas, lo que nos ayuda a entender la importancia relativa de cada elemento.
+
+Requieren un mínimo de entendimiento ya que no son gráficos tan intuitivos como uno de barras, pero al entenderlos correctamente, proporcionan mucha información muy útil de manera visual.
+
+```{r, warning = FALSE}
+library(arulesViz)
+```
+
+```{r, warning = FALSE, message = FALSE}
+plot(rules, method = "graph", control = list(type = "items"),
+     shading = "lift", measure = "confidence")
+```
+
+Este gráfico nos muestra cómo ciertos atributos están relacionados entre sí con base en el lift y la confianza. Por ejemplo, se puede observar que "fake=1" tiene una relación significativa con otros atributos como "X.posts=0" y "profile.pic=0", lo que sugiere que estas combinaciones son más comunes de lo esperado y tienen alta confianza en la regla.
+
+```{r, warning = FALSE}
+plot(reglas_fake, method = "graph")
+```
+
+"profile.pic=0" tiene un alto lift y soporte, lo que indica que es común encontrar cuentas sin foto de perfil en el conjunto de datos y que esta característica tiene una alta co-ocurrencia significativa con otros atributos. Las reglas asociadas a "fake=1" también tienen un alto soporte, sugiriendo que estas combinaciones son comunes en los datos.
+
+```{r, warning = FALSE}
+plot(reglas_fake, method = "paracoord", control = list(reorder = TRUE))
+```
+
+Podemos ver que las reglas que tienen "X.posts=0" y "fake=1" también suelen tener valores específicos para otras variables como "X.followers" y "profile.pic". Este gráfico facilita la identificación de patrones complejos y de cómo múltiples atributos se combinan en las reglas de asociación.
+
+## Conclusiones
+
+Con las de reglas de asociación, hemos descubierto que nuestros datos contienen un conocimiento valioso y hemos identificado las primeras relaciones significativas entre las características de las cuentas de Instagram. Este análisis nos ha permitido derivar varias reglas que aportan información relevante sobre el comportamiento de estas cuentas y su clasificación como falsas o reales:
+
+1.  **Cuentas falsas** (dentro de nuestro dataset):
+    -   Con una confianza del 100% en nuestro dataset, las cuentas que no tienen foto de perfil ni publicaciones son falsas.
+    -   Las cuentas sin foto de perfil y sin descripción también son falsas.
+    -   Las cuentas sin foto de perfil y que son públicas son falsas.
+
+2.  **Cuentas reales** (dentro de nuestro dataset):
+    -   Con un 97.85% de confianza en nuestro dataset, las cuentas con foto de perfil, nombre de usuario distinto del nombre real, entre 1 y 2 palabras en el nombre real, y que tienen descripción, son reales.
+    -   Las cuentas con foto de perfil, sin números en el nombre completo, nombre completo diferente del nombre de usuario, y con entre 1 y 2 palabras en el nombre real, son reales con una alta confianza en nuestro dataset.
+
+3.  **Reglas de asociación generales**:
+    -   Las cuentas sin descripción ni publicaciones, no tienen foto de perfil.
+    -   Las cuentas con más de 100 publicaciones, tienen más de 200 seguidores.
+    -   Las cuentas con foto de perfil, sin números en el nombre de usuario, con un nombre real de 1 o 2 palabras, y que siguen a más de 200 cuentas, tienen más de 200 seguidores.
+
+4.  **Itemsets más frecuentes**:
+    -   Tener el nombre de usuario distinto del nombre real
+    -   No tener números en el nombre real
+    -   No tener enlace en el perfil
+
+Estas reglas nos muestran patrones interesantes y nos ayudan a entender mejor cómo ciertos atributos de las cuentas de Instagram se relacionan entre sí y con la autenticidad de la cuenta.
+
+Sin embargo, es crucial tener en cuenta que estas conclusiones se basan en un conjunto de datos limitado. Para poder generalizar estos hallazgos a una población más amplia de cuentas de Instagram, necesitaríamos un dataset más grande y representativo.
+
+Además, aunque las reglas de asociación nos han proporcionado una buena base de conocimiento, debemos seguir aplicando otras técnicas de análisis de datos para extraer aún más información y verificar la robustez de nuestros hallazgos. Métodos adicionales como la regresión y FCA pueden complementar y profundizar en el conocimiento obtenido hasta ahora, mejorando así nuestra capacidad de detectar cuentas falsas y entender el comportamiento de las cuentas de Instagram en general.

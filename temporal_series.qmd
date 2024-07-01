@@ -1,0 +1,151 @@
+# Series temporales
+
+El análisis de series temporales es una técnica poderosa que se utiliza para comprender y prever comportamientos y tendencias a lo largo del tiempo. Este tipo de análisis es particularmente valioso en contextos donde los datos se recogen en intervalos regulares y presentan patrones que pueden ser aprovechados para hacer predicciones precisas. Las series temporales permiten identificar componentes clave como tendencias a largo plazo, estacionalidades periódicas y fluctuaciones cíclicas, ofreciendo una visión profunda del comportamiento dinámico de los datos.
+
+```{r, warning = FALSE}
+library(ggplot2)
+library(forecast)
+```
+
+Las técnicas de análisis de series temporales incluyen modelos como por ejemplo ARIMA (Autoregressive Integrated Moving Average) que hemos visto en clase, que es utilizado para modelar y prever series estacionarias y no estacionarias.
+
+```{r}
+dataset <- read.csv("datasets/train.csv")
+```
+
+Sin embargo, en este libro, al analizar un dataset de cuentas de Instagram, nos encontramos con un problema: no tenemos atributos temporales. Nuestro dataset no contiene marcas de tiempo ni ninguna variable que refleje la evolución cronológica de las métricas. Esto impide la aplicación directa de técnicas de series temporales, ya que no hay un componente temporal que permita rastrear cambios a lo largo del tiempo. Tampoco tenemos ningún tipo de orden en nuestros datos de forma que cada observación se pueda asignar temporalmente ni ordenar de ninguna forma.
+
+Aún así, Vamos a intentar aplicar esta técnica a alguna variable de nuestro dataset, a pesar de que no tenga carácter temporal:
+
+## Serie temporal con description.length
+
+Vamos a usar esta variable para crear nuestras series temporales, como hemos comentado, los datos no tienen ningún orden ni tenemos otras variables que representen tiempo, pero vamos a intentar aplicar algunas cosas de lo aprendido a esta variable para que veamos si se puede sacar algo de informcion.
+
+Creamos la serie temporal, imaginando que empieza en el año 2000 y cada dato representa un mes del año:
+
+```{r}
+serie <- ts(dataset$description.length, frequency = 12, start = 2000)
+serie
+```
+
+```{r}
+length(serie)
+```
+
+Como tenemos 576 datos y hemos simulado que cada uno corresponde a un mes del año, empezando en el año 2000 nos da por resultado que nuestros datos llegan hasta el año 2047.
+
+Vamos a ver nuestra serie dibujado:
+
+```{r}
+plot.ts(serie)
+```
+Como podemos ver es bastante aleatorio, ya que realmente lo es, se trata de las longitudes de descripción de distintas cuentas de Instagram sin ningún orden ni nada de carácter temporal.
+
+Con autoplot podemos visualizar el mismo gráfico pero con un estilo similar a la filosofia que sigue ggplot2:
+
+```{r}
+autoplot(serie)
+```
+
+Veamos el gráfico de seasonplot, el cual nos permite observar si nuestra serie temporal es estacional. Este gráfico muestra si cada año se repiten patrones específicos, ayudándonos a identificar y visualizar la estacionalidad en la serie temporal.
+
+```{r}
+ggseasonplot(serie, col = rainbow(12), year.labels = TRUE)
+```
+
+Claramente no muestra signos de estacionalidad, pues es prácticamente aleatorio, no hay ningún tipo de patrón.
+
+## Previsiones
+
+Vamos a probar a realizar previsiones con los métodos básicos que hemos visto. Estos métodos de por si son demasiado sencillos, y para el caso de nuestra serie que venimos diciendo que no es adecuada, sabemos que no va a dar ningún resultado bueno, pero vamos a aplicarlos para que lo veamos. Luego usaremos algunos métodos más complejos:
+
+### Método de la media
+
+```{r}
+avg.serie <- meanf(serie, 10)
+plot(avg.serie)
+```
+
+### Método _naive_
+
+```{r}
+naive.serie <- naive(serie, 10)
+plot(naive.serie)
+```
+
+### Método _naive_ estacional
+
+```{r}
+snaive.serie <- snaive(serie, 10)
+plot(snaive.serie)
+```
+
+### Método _drift_
+
+```{r}
+rwf.serie <- rwf(serie, 20, drift = TRUE)
+plot(rwf.serie)
+```
+
+Como hemos comentado, ningún método da una previsión que tenga coherencia, tan solo el método _naive_ estacional, aunque ya sabemos que este solo replica la predicción del año anterior.
+
+## Descomposición
+
+Una serie temporal se puede descomponer en tres componentes: estacional, tendencia y la componente de aleatoriedad.
+
+Vamos a aplicar la descomposición a nuestra serie:
+
+```{r}
+decomp <- decompose(serie)
+```
+
+Vamos a visualizarlo:
+
+```{r}
+plot(decomp)
+```
+
+Si nuestra serie fuese realmente una serie válida, estaríamos observando datos interesantes, por ejemplo, podríamos decir que la tendencia global de la longitud de la descripción ha sido bajista, y que tenemos una componente estacionaria en la que hay ciertos momentos del año que hay un pico alto y otros muy bajos.
+
+Pero como el tiempo aquí "nos lo hemos inventando" sacar esas conclusiones es también inventarnoslo.
+
+## Previsiones complejas
+
+Por útimo, vamos a utilizar métodos más avanzados de previsiones, simplemente para visualizar los resultados.
+
+### HoltWinters
+
+El método Holt-Winters es una técnica de suavizamiento exponencial que permite modelar y prever series temporales con tendencia y estacionalidad. Este método tiene tres componentes: el nivel (alpha), la tendencia (beta) y la estacionalidad (gamma). Es bueno usarlo en series temporales con tendencia y estacionalidad o con patrones estacionalides conocidos.
+
+Vamos a aplicarlo a nuestra serie temporal:
+
+```{r}
+ts.p1.forecasts <- HoltWinters(serie, beta = FALSE, gamma = FALSE)
+plot(ts.p1.forecasts)
+```
+
+Visualicemos una predicción de un año:
+
+```{r}
+holtwinters_forecast <- forecast(ts.p1.forecasts, h = 12)
+plot(holtwinters_forecast)
+```
+
+### ARIMA y auto.arima
+
+ARIMA (AutoRegressive Integrated Moving Average) es un modelo popular en el análisis de series temporales, utilizado para modelar y prever series que pueden no ser estacionarias. El modelo ARIMA se define por tres parámetros: p (autoregresivo), d (diferenciación) y q (media móvil). El método auto.arima selecciona automáticamente los mejores parámetros para el modelo ARIMA. Es bueno usar ARIMA para series temporales estacionarias.
+
+Aplicamos el modelo auto.arima a nuestra serie temporal:
+
+```{r}
+autoarima_model <- auto.arima(serie)
+plot(forecast(autoarima_model, h = 20))
+```
+
+Queda más que claro que lo que estamos haciendo no conduce a resultados con sentido, hay muchas más cosas que podemos hacer con series temporales, pero sabiendo que no nos conducen a nada, vamos a parar aquí.
+
+## Conclusiones
+
+En este análisis, hemos aplicado varias técnicas de previsión de series temporales, como Holt-Winters y ARIMA, a una variable que en realidad no tiene un carácter temporal. Aunque hemos visto cómo se pueden usar estas técnicas, los resultados no tienen sentido práctico en este caso, ya que la serie de datos es aleatoria y no presenta patrones temporales reales. 
+
+Sin embargo, es importante comprender y saber aplicar estas técnicas, ya que son herramientas muy valiosas en el análisis de datos cuando se dispone de series temporales con componentes significativos de tendencia y estacionalidad.

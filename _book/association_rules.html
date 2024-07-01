@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Detección de cuentas falsas de Instagram - 4&nbsp; Reglas de asociación</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./formal_concept_analysis.html" rel="next">
+<link href="./data_visualization.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./association_rules.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Reglas de asociación</span></a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Detección de cuentas falsas de Instagram</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introducción</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./exploratory_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Análisis exploratorio de datos</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data_visualization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Visualización de datos</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./association_rules.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Reglas de asociación</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./formal_concept_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">FCA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Regresión</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./temporal_series.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Series temporales</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./other_techniques.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Otras técnicas</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./predictor.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Predictor interactivo</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./summary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Resumen</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#pre-processing" id="toc-pre-processing" class="nav-link active" data-scroll-target="#pre-processing"><span class="header-section-number">4.1</span> Pre-processing</a>
+  <ul class="collapse">
+  <li><a href="#variables-binarias" id="toc-variables-binarias" class="nav-link" data-scroll-target="#variables-binarias"><span class="header-section-number">4.1.1</span> Variables binarias</a></li>
+  <li><a href="#variables-no-binarias" id="toc-variables-no-binarias" class="nav-link" data-scroll-target="#variables-no-binarias"><span class="header-section-number">4.1.2</span> Variables no binarias</a></li>
+  <li><a href="#resultados-del-pre-processing" id="toc-resultados-del-pre-processing" class="nav-link" data-scroll-target="#resultados-del-pre-processing"><span class="header-section-number">4.1.3</span> Resultados del pre-processing</a></li>
+  </ul></li>
+  <li><a href="#generando-reglas" id="toc-generando-reglas" class="nav-link" data-scroll-target="#generando-reglas"><span class="header-section-number">4.2</span> Generando reglas</a>
+  <ul class="collapse">
+  <li><a href="#objeto-transaccional" id="toc-objeto-transaccional" class="nav-link" data-scroll-target="#objeto-transaccional"><span class="header-section-number">4.2.1</span> Objeto transaccional</a></li>
+  <li><a href="#apriori" id="toc-apriori" class="nav-link" data-scroll-target="#apriori"><span class="header-section-number">4.2.2</span> Apriori</a></li>
+  <li><a href="#reglas-que-inducen-cuenta-falsa" id="toc-reglas-que-inducen-cuenta-falsa" class="nav-link" data-scroll-target="#reglas-que-inducen-cuenta-falsa"><span class="header-section-number">4.2.3</span> Reglas que inducen cuenta falsa</a></li>
+  <li><a href="#reglas-que-inducen-cuenta-real" id="toc-reglas-que-inducen-cuenta-real" class="nav-link" data-scroll-target="#reglas-que-inducen-cuenta-real"><span class="header-section-number">4.2.4</span> Reglas que inducen cuenta real</a></li>
+  <li><a href="#reglas-con-más-de-6-items" id="toc-reglas-con-más-de-6-items" class="nav-link" data-scroll-target="#reglas-con-más-de-6-items"><span class="header-section-number">4.2.5</span> Reglas con más de 6 items</a></li>
+  <li><a href="#reglas-entre-otros-atributos" id="toc-reglas-entre-otros-atributos" class="nav-link" data-scroll-target="#reglas-entre-otros-atributos"><span class="header-section-number">4.2.6</span> Reglas entre otros atributos</a></li>
+  <li><a href="#conjuntos-de-items-frecuentes" id="toc-conjuntos-de-items-frecuentes" class="nav-link" data-scroll-target="#conjuntos-de-items-frecuentes"><span class="header-section-number">4.2.7</span> Conjuntos de items frecuentes</a></li>
+  </ul></li>
+  <li><a href="#visualización-con-arulesviz" id="toc-visualización-con-arulesviz" class="nav-link" data-scroll-target="#visualización-con-arulesviz"><span class="header-section-number">4.3</span> Visualización con arulesViz</a></li>
+  <li><a href="#conclusiones" id="toc-conclusiones" class="nav-link" data-scroll-target="#conclusiones"><span class="header-section-number">4.4</span> Conclusiones</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Reglas de asociación</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<p>El análisis de reglas de asociación es una técnica fundamental en el campo de la minería de datos y el aprendizaje automático. Se utiliza para descubrir patrones interesantes y relaciones ocultas entre variables en conjuntos de datos. En particular, las reglas de asociación son útiles para identificar asociaciones frecuentes entre diferentes elementos en una base de datos transaccional.</p>
+<p>En este trabajo, exploraremos el uso de reglas de asociación para el análisis de cuentas de Instagram. Utilizaremos el paquete <code>arules</code> en R para realizar este análisis. Nuestro conjunto de datos contiene una variedad de características de las cuentas de Instagram, como el número de seguidores, el número de publicaciones, si la cuenta es privada o no, entre otros.</p>
+<p>A lo largo de este análisis, exploraremos cómo las diferentes características de las cuentas de Instagram están asociadas entre sí, identificando reglas de asociación significativas que nos ayuden a comprender mejor el ecosistema de esta red social.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(arules)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(magrittr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"datasets/train.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Antes de ponernos manos a la obra, tenemos que saber que arules no se lleva bien con las variables con un gran número de valores. Es más, solo se lleva bien con las binarias.</p>
+<p>En nuestro dataset, hemos visto en el análisis exploratorio que hay 5 variables binarias (bien para arules) y las demás no lo son. Por suerte, gracias a los conocimientos que hemso adquirido durante la asignatura, sabemos que esto tiene solución.</p>
+<p>Comprendiendo bien el significado de las variables y aplicando técnicas de discretización y agrupación, podemos convertir nuestras variables númericas a directamente binarias, o con pocos valores, y las que tengan pocos valores, podemos transformarlas a variables binarias.</p>
+<p>Vamos a realizar un buen trabajo de pre-processing para este apartado, así nuestras reglas serán potentes y tendrán un conocimiento importante:</p>
+<section id="pre-processing" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="pre-processing"><span class="header-section-number">4.1</span> Pre-processing</h2>
+<p>Recordamos del apartado de análisis exploratorio que teníamos:</p>
+<ul>
+<li><strong>Variables binarias</strong>:
+<ul>
+<li>profile.pic</li>
+<li>name..username</li>
+<li>external.URL</li>
+<li>private</li>
+<li>fake</li>
+</ul></li>
+<li><strong>Variables no binarias</strong>:
+<ul>
+<li>nums.length.username</li>
+<li>fullname.words</li>
+<li>nums.length.fullname</li>
+<li>description.length</li>
+<li>X.posts</li>
+<li>X.followers</li>
+<li>X.follows</li>
+</ul></li>
+</ul>
+<section id="variables-binarias" class="level3" data-number="4.1.1">
+<h3 data-number="4.1.1" class="anchored" data-anchor-id="variables-binarias"><span class="header-section-number">4.1.1</span> Variables binarias</h3>
+<p>Las añadimos directamente al dataset modificado que vamos a ir construyendo</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>datarules <span class="ot">&lt;-</span> <span class="fu">transmute</span>(dataset, </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>                       <span class="at">profile.pic=</span>profile.pic, </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">name..username=</span>name..username,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                       <span class="at">external.URL=</span>external.URL,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                       <span class="at">private=</span>private,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                       <span class="at">fake=</span>fake)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="variables-no-binarias" class="level3" data-number="4.1.2">
+<h3 data-number="4.1.2" class="anchored" data-anchor-id="variables-no-binarias"><span class="header-section-number">4.1.2</span> Variables no binarias</h3>
+<p>Para las variables no binarias, podemos tener distintos puntos de vista, así que vamos a ir viendo cada variable:</p>
+<section id="nums.length.username" class="level4" data-number="4.1.2.1">
+<h4 data-number="4.1.2.1" class="anchored" data-anchor-id="nums.length.username"><span class="header-section-number">4.1.2.1</span> nums.length.username</h4>
+<p>El ratio de números en el nombre de usuario de la cuenta es díficilmente binarizable, ya que no es trivial donde poner el punto medio. En el nombre de persona si resulta extraño tener números, pero en el nombre de usuario puede ser normal, no tiene porque estar relacionado directamente con que la cuenta sea falsa.</p>
+<p>Podríamos binarizar simplemente en “tiene números o no tiene números”, ya que como vimos en el análisis exploratorio, teníamos prácticamente un 50-50, pero eso no exprimiría todo el conocimiento de los datos, pues lo que viene a representar esta variable es el ratio de carácteres númericos sobre la longitud del nombre.</p>
+<p>Vamos a discretizar en 3 categorías:</p>
+<ul>
+<li>“0”</li>
+<li>“(0, 0.5]”</li>
+<li>“(0.5, 1]”</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>lu_discretize <span class="ot">&lt;-</span> <span class="fu">transmute</span>(dataset, </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">nums.length.username=</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>            <span class="fu">ifelse</span>(nums.length.username <span class="sc">==</span> <span class="dv">0</span>, </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"0"</span>, <span class="fu">ifelse</span>(nums.length.username <span class="sc">&lt;=</span> <span class="fl">0.5</span>, </span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"(0, 0.5]"</span>, <span class="st">"(0.5, 1]"</span>)))</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>datarules <span class="ot">&lt;-</span> <span class="fu">mutate</span>(datarules, </span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">nums.length.username=</span>lu_discretize<span class="sc">$</span>nums.length.username)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="nums.length.fullname" class="level4" data-number="4.1.2.2">
+<h4 data-number="4.1.2.2" class="anchored" data-anchor-id="nums.length.fullname"><span class="header-section-number">4.1.2.2</span> nums.length.fullname</h4>
+<p>Para esta variable, si vamos a binarizar, ya que no es lo normal tener un número en el nombre completo. Pondremos un 0 a las cuenas que no tengan números en el nombre completo y un 1 a las que si tengan,</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>lfn_binary <span class="ot">&lt;-</span> <span class="fu">transmute</span>(dataset, </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                        <span class="at">nums.length.fullname=</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>                          <span class="fu">as.numeric</span>(nums.length.fullname<span class="sc">!=</span><span class="dv">0</span>))</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>datarules <span class="ot">&lt;-</span> <span class="fu">mutate</span>(datarules, </span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">has.nums.fullname=</span>lfn_binary<span class="sc">$</span>nums.length.fullname)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="fullname.words" class="level4" data-number="4.1.2.3">
+<h4 data-number="4.1.2.3" class="anchored" data-anchor-id="fullname.words"><span class="header-section-number">4.1.2.3</span> fullname.words</h4>
+<p>Para esta variable vamos a tomar una decisión que quizá no guste a todos los lectores, pero creemos que dará los mejores resultados (recordamos que esta variable representa el número de palabras en el nombre completo)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dataset<span class="sc">$</span>fullname.words)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+  0   1   2   3   4   5   6  10  12 
+ 57 283 187  34   7   4   2   1   1 </code></pre>
+</div>
+</div>
+<p>Tener 0 palabras en el nombre no es lo normal, tener entre 1 y 2, lo es, tener 3 o más tampoco es normal. Esto obviamente subjetivo y está basado en la opinión subjetiva del escritor de este libro en base a su experiencia en el uso de Instagram.</p>
+<p>Vamos a categorizar esta varaible en 3 rangos:</p>
+<ul>
+<li>“0”</li>
+<li>“[1, 2]”</li>
+<li>“&gt; 2”</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fnw_discretize <span class="ot">&lt;-</span> <span class="fu">transmute</span>(dataset, </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">fullname.words =</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>            <span class="fu">ifelse</span>(fullname.words <span class="sc">==</span> <span class="dv">0</span>, </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"0"</span>, <span class="fu">ifelse</span>(fullname.words <span class="sc">&lt;=</span> <span class="dv">2</span>, </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"[1, 2]"</span>, <span class="st">"&gt; 2"</span>)))</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>datarules <span class="ot">&lt;-</span> <span class="fu">mutate</span>(datarules, </span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">fullname.words=</span>fnw_discretize<span class="sc">$</span>fullname.words)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="description.length" class="level4" data-number="4.1.2.4">
+<h4 data-number="4.1.2.4" class="anchored" data-anchor-id="description.length"><span class="header-section-number">4.1.2.4</span> description.length</h4>
+<p>Vamos a binarizar esta variable, en el análisis exploratorio vimos que había mas cuentas sin descripción que con descripción y esto puede ser interesante.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>dl_binary <span class="ot">&lt;-</span> <span class="fu">transmute</span>(dataset, </span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                        <span class="at">description.length=</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                          <span class="fu">as.numeric</span>(description.length<span class="sc">!=</span><span class="dv">0</span>))</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>datarules <span class="ot">&lt;-</span> <span class="fu">mutate</span>(datarules, </span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">has.description=</span>dl_binary<span class="sc">$</span>description.length)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="x.posts" class="level4" data-number="4.1.2.5">
+<h4 data-number="4.1.2.5" class="anchored" data-anchor-id="x.posts"><span class="header-section-number">4.1.2.5</span> X.posts</h4>
+<p>Para esta variable pasaremos a 3 categorías, ya que creemos que dividen bien el conjunto de valores:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas sin publicaciones: 157"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas con entre 0 y 100 publicaciones: 292"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas con más de 100 publicaciones: 576"</code></pre>
+</div>
+</div>
+<p>Por tanto estas categorías son:</p>
+<ul>
+<li>“0”</li>
+<li>“(0, 100]”</li>
+<li>“&gt; 100”</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>p_discretize <span class="ot">&lt;-</span> <span class="fu">transmute</span>(dataset, </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">X.posts =</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>            <span class="fu">ifelse</span>(X.posts <span class="sc">==</span> <span class="dv">0</span>, </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"0"</span>, <span class="fu">ifelse</span>(X.posts <span class="sc">&lt;=</span> <span class="dv">100</span>, </span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"(0, 100]"</span>, <span class="fu">paste0</span>(<span class="st">"&gt; 100"</span>))))</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>datarules <span class="ot">&lt;-</span> <span class="fu">mutate</span>(datarules, </span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">X.posts=</span>p_discretize<span class="sc">$</span>X.posts)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="x.followers" class="level4" data-number="4.1.2.6">
+<h4 data-number="4.1.2.6" class="anchored" data-anchor-id="x.followers"><span class="header-section-number">4.1.2.6</span> X.followers</h4>
+<p>Vamos a dividir de nuevo en 3 categorías que hemos considerado:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas con menos de 20 seguidores: 95"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas con entre 20 y 200 seguidores: 223"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas con más de 200 seguidores: 258"</code></pre>
+</div>
+</div>
+<p>Por tanto estas categorías son:</p>
+<ul>
+<li>“&lt; 20”</li>
+<li>“[20, 200]”</li>
+<li>“&gt; 200”</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>fwrs_discretize <span class="ot">&lt;-</span> <span class="fu">transmute</span>(dataset, </span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">X.followers =</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>            <span class="fu">ifelse</span>(X.followers <span class="sc">&lt;</span> <span class="dv">20</span>, </span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"&lt; 20"</span>, <span class="fu">ifelse</span>(X.followers <span class="sc">&lt;=</span> <span class="dv">200</span>, </span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"[20, 200]"</span>, <span class="fu">paste0</span>(<span class="st">"&gt; 200"</span>))))</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>datarules <span class="ot">&lt;-</span> <span class="fu">mutate</span>(datarules, </span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">X.followers=</span>fwrs_discretize<span class="sc">$</span>X.followers)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="x.follows" class="level4" data-number="4.1.2.7">
+<h4 data-number="4.1.2.7" class="anchored" data-anchor-id="x.follows"><span class="header-section-number">4.1.2.7</span> X.follows</h4>
+<p>Para los seguidos vamos a dividir en las mismas categorías que para los seguidores:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas con menos de 20 seguidos: 64"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas con entre 20 y 200 seguidos: 211"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cuentas con más de 200 seguidos: 301"</code></pre>
+</div>
+</div>
+<p>Por tanto estas categorías son:</p>
+<ul>
+<li>“&lt; 20”</li>
+<li>“[20, 200]”</li>
+<li>“&gt; 200”</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>fws_discretize <span class="ot">&lt;-</span> <span class="fu">transmute</span>(dataset, </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">X.follows =</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>            <span class="fu">ifelse</span>(X.follows <span class="sc">&lt;</span> <span class="dv">20</span>, </span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"&lt; 20"</span>, <span class="fu">ifelse</span>(X.follows <span class="sc">&lt;=</span> <span class="dv">200</span>, </span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"[20, 200]"</span>, <span class="fu">paste0</span>(<span class="st">"&gt; 200"</span>))))</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>datarules <span class="ot">&lt;-</span> <span class="fu">mutate</span>(datarules, </span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">X.follows=</span>fws_discretize<span class="sc">$</span>X.follows)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="resultados-del-pre-processing" class="level3" data-number="4.1.3">
+<h3 data-number="4.1.3" class="anchored" data-anchor-id="resultados-del-pre-processing"><span class="header-section-number">4.1.3</span> Resultados del pre-processing</h3>
+<p>Por tanto, después de nuestro preprocessing, nos quedan como variables de nuestro dataset:</p>
+<ul>
+<li><strong>profile.pic</strong>
+<ul>
+<li>Variable binaria que toma el valor 1 si la cuenta tiene foto de perfil, 0 si no tiene.</li>
+</ul></li>
+<li><strong>name..username</strong>
+<ul>
+<li>Variable binaria que toma el valor 1 si el nombre completo de la persona y el de usuario es el mismo, 0 si no.</li>
+</ul></li>
+<li><strong>external.URL</strong>
+<ul>
+<li>Variable binaria que toma el valor 1 si la cuenta tiene un enlace puesto en su perfil, 0 si no.</li>
+</ul></li>
+<li><strong>private</strong>
+<ul>
+<li>Variable binaria que toma el valor 1 si la cuenta es privada, 0 si es pública.</li>
+</ul></li>
+<li><strong>nums.length.username</strong>
+<ul>
+<li>Variable trinaria que toma los valores:
+<ul>
+<li>“0” si no tiene números en el nombre de usuario.</li>
+<li>“(0, 0.5]” si el ratio de números es mayor a 0 y menor o igual a 0.5.</li>
+<li>“(0.5, 1]” si el ratio de números es mayor a 0.5 y menor o igual a 1.</li>
+</ul></li>
+</ul></li>
+<li><strong>has.nums.fullname</strong>
+<ul>
+<li>Variable binaria que toma el valor 1 si el nombre completo contiene números, 0 si no contiene.</li>
+</ul></li>
+<li><strong>fullname.words</strong>
+<ul>
+<li>Variable categórica que toma los valores:
+<ul>
+<li>“0” si el nombre completo no tiene palabras.</li>
+<li>“[1, 2]” si el nombre completo tiene entre 1 y 2 palabras.</li>
+<li>“&gt; 2” si el nombre completo tiene más de 2 palabras.</li>
+</ul></li>
+</ul></li>
+<li><strong>has.description</strong>
+<ul>
+<li>Variable binaria que toma el valor 1 si la cuenta tiene una descripción, 0 si no tiene.</li>
+</ul></li>
+<li><strong>X.posts</strong>
+<ul>
+<li>Variable categórica que toma los valores:
+<ul>
+<li>“0” si la cuenta no tiene publicaciones.</li>
+<li>“(0, 100]” si la cuenta tiene entre 1 y 100 publicaciones.</li>
+<li>“&gt; 100” si la cuenta tiene más de 100 publicaciones.</li>
+</ul></li>
+</ul></li>
+<li><strong>X.followers</strong>
+<ul>
+<li>Variable categórica que toma los valores:
+<ul>
+<li>“&lt; 20” si la cuenta tiene menos de 20 seguidores.</li>
+<li>“[20, 200]” si la cuenta tiene entre 20 y 200 seguidores.</li>
+<li>“&gt; 200” si la cuenta tiene más de 200 seguidores.</li>
+</ul></li>
+</ul></li>
+<li><strong>X.follows</strong>
+<ul>
+<li>Variable categórica que toma los valores:
+<ul>
+<li>“&lt; 20” si la cuenta sigue a menos de 20 cuentas.</li>
+<li>“[20, 200]” si la cuenta sigue a entre 20 y 200 cuentas.</li>
+<li>“&gt; 200” si la cuenta sigue a más de 200 cuentas.</li>
+</ul></li>
+</ul></li>
+<li><strong>fake</strong>
+<ul>
+<li>Variable binaria que toma el valor 1 si la cuenta es falsa, 0 si no lo es.</li>
+</ul></li>
+</ul>
+<p>Con este nuevo dataset binarizado y discretizado, estamos listos para proceder al análisis de reglas de asociación utilizando el paquete <code>arules</code> en R. Este preprocesamiento nos asegura que las variables están en un formato adecuado para el análisis, lo que facilitará la identificación de patrones y asociaciones significativas.</p>
+</section>
+</section>
+<section id="generando-reglas" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="generando-reglas"><span class="header-section-number">4.2</span> Generando reglas</h2>
+<p>Nuestro dataset ha quedado así:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>'data.frame':   576 obs. of  12 variables:
+ $ profile.pic         : int  1 1 1 1 1 1 1 1 1 1 ...
+ $ name..username      : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ external.URL        : int  0 0 0 0 0 1 0 0 0 1 ...
+ $ private             : int  0 0 1 0 1 0 0 0 0 0 ...
+ $ nums.length.username: chr  "(0, 0.5]" "0" "(0, 0.5]" "0" ...
+ $ has.nums.fullname   : num  0 0 0 0 0 0 0 0 0 0 ...
+ $ fullname.words      : chr  "0" "[1, 2]" "[1, 2]" "[1, 2]" ...
+ $ has.description     : num  1 1 0 1 0 1 1 0 1 1 ...
+ $ X.posts             : chr  "(0, 100]" "&gt; 100" "(0, 100]" "&gt; 100" ...
+ $ X.followers         : chr  "&gt; 200" "&gt; 200" "[20, 200]" "&gt; 200" ...
+ $ X.follows           : chr  "&gt; 200" "&gt; 200" "[20, 200]" "&gt; 200" ...
+ $ fake                : int  0 0 0 0 0 0 0 0 0 0 ...</code></pre>
+</div>
+</div>
+<p>Ahora arules puede generar las reglas fácilmente a partir de este dataset usando el algoritmo apriori. Directamente se podría aplicar apriori, pero lo suyo es convertir el dataset a un objeto transaccional primero.</p>
+<section id="objeto-transaccional" class="level3" data-number="4.2.1">
+<h3 data-number="4.2.1" class="anchored" data-anchor-id="objeto-transaccional"><span class="header-section-number">4.2.1</span> Objeto transaccional</h3>
+<p>Antes de ello, para que la conversion se haga bien, tenemos que poner nuestras variables binarias como variables de tipo factor, si no la conversión a objeto transaccional no se hará bien:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>datarules<span class="sc">$</span>profile.pic <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(datarules<span class="sc">$</span>profile.pic)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>datarules<span class="sc">$</span>external.URL <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(datarules<span class="sc">$</span>external.URL)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>datarules<span class="sc">$</span>name..username <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(datarules<span class="sc">$</span>name..username)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>datarules<span class="sc">$</span>private <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(datarules<span class="sc">$</span>private)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>datarules<span class="sc">$</span>has.nums.fullname <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(datarules<span class="sc">$</span>has.nums.fullname)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>datarules<span class="sc">$</span>has.description <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(datarules<span class="sc">$</span>has.description)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>datarules<span class="sc">$</span>fake <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(datarules<span class="sc">$</span>fake)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Ahora si, converitmos:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>Tdatarules <span class="ot">&lt;-</span> <span class="fu">as</span>(datarules, <span class="st">"transactions"</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>Tdatarules<span class="sc">@</span>itemInfo<span class="sc">$</span>labels</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "profile.pic=0"                 "profile.pic=1"                
+ [3] "name..username=0"              "name..username=1"             
+ [5] "external.URL=0"                "external.URL=1"               
+ [7] "private=0"                     "private=1"                    
+ [9] "nums.length.username=(0, 0.5]" "nums.length.username=(0.5, 1]"
+[11] "nums.length.username=0"        "has.nums.fullname=0"          
+[13] "has.nums.fullname=1"           "fullname.words=[1, 2]"        
+[15] "fullname.words=&gt; 2"            "fullname.words=0"             
+[17] "has.description=0"             "has.description=1"            
+[19] "X.posts=(0, 100]"              "X.posts=&gt; 100"                
+[21] "X.posts=0"                     "X.followers=[20, 200]"        
+[23] "X.followers=&lt; 20"              "X.followers=&gt; 200"            
+[25] "X.follows=[20, 200]"           "X.follows=&lt; 20"               
+[27] "X.follows=&gt; 200"               "fake=0"                       
+[29] "fake=1"                       </code></pre>
+</div>
+</div>
+<p>Como vemos, la conversión ha hecho justamente lo que queríamos. Por ejemplo, la variable X.posts, que le dimos tres valores distintos, se han convertido en 3 variables, que cada una de ellas es binaria. Es una técnica que podríamos haber hecho a mano, pero que ya que el comando as(…, “transactions”) lo hace por nosotros, no está mal aprovecharlo. Ahora tenemos 29 variables.</p>
+</section>
+<section id="apriori" class="level3" data-number="4.2.2">
+<h3 data-number="4.2.2" class="anchored" data-anchor-id="apriori"><span class="header-section-number">4.2.2</span> Apriori</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>rules <span class="ot">&lt;-</span> <span class="fu">apriori</span>(Tdatarules, <span class="at">parameter =</span> <span class="fu">list</span>(<span class="at">conf=</span><span class="fl">0.1</span>, <span class="at">supp=</span><span class="fl">0.2</span>, <span class="at">target=</span><span class="st">"rules"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Apriori
+
+Parameter specification:
+ confidence minval smax arem  aval originalSupport maxtime support minlen
+        0.1    0.1    1 none FALSE            TRUE       5     0.2      1
+ maxlen target  ext
+     10  rules TRUE
+
+Algorithmic control:
+ filter tree heap memopt load sort verbose
+    0.1 TRUE TRUE  FALSE TRUE    2    TRUE
+
+Absolute minimum support count: 115 
+
+set item appearances ...[0 item(s)] done [0.00s].
+set transactions ...[29 item(s), 576 transaction(s)] done [0.00s].
+sorting and recoding items ... [21 item(s)] done [0.00s].
+creating transaction tree ... done [0.00s].
+checking subsets of size 1 2 3 4 5 6 7 8 done [0.00s].
+writing ... [6751 rule(s)] done [0.00s].
+creating S4 object  ... done [0.00s].</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(rules)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 6751</code></pre>
+</div>
+</div>
+<p>El hecho de haber usado un soporte de 0.05 y 0.1 ha sido nuestra elección para filtrar entre las miles de reglas que hay si no ponemos un límite. El uso de “target = rules” no es necesario, pero es para recordar que estamos buscando reglas. También se pueden buscar otras cosas como los conjuntos de items más frequentes.</p>
+<p>Vamos a continuar filtrando estas reglas, para quedarnos con las mejores. Primero vamos a eliminar las reglas redundantes.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>indices_no_redundantes <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="sc">!</span><span class="fu">is.redundant</span>(rules))</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>rules <span class="ot">&lt;-</span> rules[indices_no_redundantes]</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="fu">inspect</span>(<span class="fu">head</span>(rules))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    lhs    rhs                     support   confidence coverage lift count
+[1] {}  =&gt; {X.posts=&gt; 100}         0.2204861 0.2204861  1        1    127  
+[2] {}  =&gt; {X.posts=0}             0.2725694 0.2725694  1        1    157  
+[3] {}  =&gt; {profile.pic=0}         0.2986111 0.2986111  1        1    172  
+[4] {}  =&gt; {X.follows=[20, 200]}   0.3663194 0.3663194  1        1    211  
+[5] {}  =&gt; {private=1}             0.3819444 0.3819444  1        1    220  
+[6] {}  =&gt; {X.followers=[20, 200]} 0.3871528 0.3871528  1        1    223  </code></pre>
+</div>
+</div>
+<p>Y vamos a quedarnos solo con las significativas con el método de fisher:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>indices_significativos <span class="ot">&lt;-</span> <span class="fu">is.significant</span>(rules, <span class="at">method=</span><span class="st">"fisher"</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>rules <span class="ot">&lt;-</span> rules[indices_significativos]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>De esta manera nos hemos quedado con muchas menos reglas, pero con mucha mas relevancia. No sirven de nada miles de reglas si luego ni si quiera podemos trabajar con ellas.</p>
+</section>
+<section id="reglas-que-inducen-cuenta-falsa" class="level3" data-number="4.2.3">
+<h3 data-number="4.2.3" class="anchored" data-anchor-id="reglas-que-inducen-cuenta-falsa"><span class="header-section-number">4.2.3</span> Reglas que inducen cuenta falsa</h3>
+<p>Lo que nos interesa son las reglas que nos lleven a que la cuenta es fake, vamos a observar estas:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>reglas_fake <span class="ot">&lt;-</span> <span class="fu">subset</span>(rules, rhs <span class="sc">%in%</span> <span class="st">"fake=1"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Tenemos 38 reglas que nos llevan a que la cuenta es falsa."</code></pre>
+</div>
+</div>
+<p>Vamos a observar las 5 mejores reglas ordenadas por lift:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>reglas_fake_lift <span class="ot">&lt;-</span> <span class="fu">sort</span>(reglas_fake, <span class="at">by=</span><span class="st">"lift"</span>)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">inspect</span>(reglas_fake_lift[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    lhs                                       rhs      support   confidence
+[1] {profile.pic=0, X.posts=0}             =&gt; {fake=1} 0.2152778 1.0000000 
+[2] {profile.pic=0, has.description=0}     =&gt; {fake=1} 0.2829861 1.0000000 
+[3] {profile.pic=0, private=0}             =&gt; {fake=1} 0.2100694 1.0000000 
+[4] {profile.pic=0, fullname.words=[1, 2]} =&gt; {fake=1} 0.2725694 0.9936709 
+[5] {profile.pic=0}                        =&gt; {fake=1} 0.2951389 0.9883721 
+    coverage  lift     count
+[1] 0.2152778 2.000000 124  
+[2] 0.2829861 2.000000 163  
+[3] 0.2100694 2.000000 121  
+[4] 0.2743056 1.987342 157  
+[5] 0.2986111 1.976744 170  </code></pre>
+</div>
+</div>
+<p>Por primera vez en lo que llevamos de libro hemos obtenido un conocimiento interesante para la detección de cuentas falsas de Instagram.</p>
+<p>La primera regla, por ejemplo, nos está diciendo que con una confianza del 100% en nuestro dataset, las cuentas que no tienen foto de perfil ni posts, son falsas.</p>
+<p>Lo mismo con las siguientes reglas que tienen 100% de confianza: - Las cuentas sin foto de perfil ni descripción, son falsas - Las cuentas sin foto de perfil y que son públicas son falsas</p>
+<p>Obviamente esto no significan que cualquier cuenta de Instagram que encontremos en Internet es falsa si cumple dichas condiciones, si no que en nuestro dataset siempre es así, y nuestro dataset no es demasiado grande. Necesitaríamos un dataset mucho más grande para poder afirmar esto para un caso general, pero ya son conclusiones interesantes.</p>
+<p>También vemos que la quinta regla nos dice que casi siempre que una cuenta no tiene foto de perfil, es falsa. Por ello no podemos hacer caso a lo que dicen las reglas sin más, tenemos que ver más opciones y usar más técnicas de análisis de datos, pero como primeros conocimientos, es un buen resultado.</p>
+<p>Otra cosa a tener en cuenta es el soporte de las reglas. Vamos a ver que dicen las reglas con más soporte:</p>
+<p>Mejores reglas ordenadas por soporte:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>reglas_fake_support <span class="ot">&lt;-</span> <span class="fu">sort</span>(reglas_fake, <span class="at">by=</span><span class="st">"support"</span>)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="fu">inspect</span>(reglas_fake_support[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    lhs                                        rhs      support   confidence
+[1] {external.URL=0}                        =&gt; {fake=1} 0.5000000 0.5658153 
+[2] {fullname.words=[1, 2]}                 =&gt; {fake=1} 0.4322917 0.5297872 
+[3] {external.URL=0, fullname.words=[1, 2]} =&gt; {fake=1} 0.4322917 0.5942721 
+[4] {has.description=0}                     =&gt; {fake=1} 0.4305556 0.7607362 
+[5] {external.URL=0, has.description=0}     =&gt; {fake=1} 0.4305556 0.7774295 
+    coverage  lift     count
+[1] 0.8836806 1.131631 288  
+[2] 0.8159722 1.059574 249  
+[3] 0.7274306 1.188544 249  
+[4] 0.5659722 1.521472 248  
+[5] 0.5538194 1.554859 248  </code></pre>
+</div>
+</div>
+<p>Más soporte significa que esos patrones se dan mas veces en el dataset, pero sin tener en cuenta la confianza de estas reglas, no sirve de nada. Por ejemplo, la primera regla nos dice que si una cuenta no tiene enlace externo, entonces es falsa, y se da el 50% de las veces en nuestro dataset. Pero la confianza es solo del 56%. No es bueno fiarse simplemente de esta regla.</p>
+<p>En vez de buscar reglas tan simples y generales como “dada una sola cosa entonces la cuenta es fake” podemos buscar reglas que tengan a la izquierda varios items, lo que hará que el soporte sea más bajo, pero puede que nos de reglas mas fiables.</p>
+<p>Que una cuenta sea fake no va a depender únicamente de que no tenga foto de perfil o de que no tenga descripción, si no que probablemente cada condición tenga cierto peso y no sea tan sencillo.</p>
+<p>Por todo esto no podemos fiarnos solamente del soporte de la regla, y tenemos que mirar también la confianza. O mejor aún, el lift.</p>
+</section>
+<section id="reglas-que-inducen-cuenta-real" class="level3" data-number="4.2.4">
+<h3 data-number="4.2.4" class="anchored" data-anchor-id="reglas-que-inducen-cuenta-real"><span class="header-section-number">4.2.4</span> Reglas que inducen cuenta real</h3>
+<p>Antes de buscar reglas con más items en la parte izquierda, vamos a ver las reglas que nos llevan a que la cuenta no es falsa.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>reglas_reales <span class="ot">&lt;-</span> <span class="fu">subset</span>(rules, rhs <span class="sc">%in%</span> <span class="st">"fake=0"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Tenemos 138 reglas que nos llevan a que la cuenta es real."</code></pre>
+</div>
+</div>
+<p>Vamos a ver las reglas con mayor lift:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>reglas_reales_lift <span class="ot">&lt;-</span> <span class="fu">sort</span>(reglas_reales, <span class="at">by=</span><span class="st">"lift"</span>)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">inspect</span>(reglas_reales_lift[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    lhs                          rhs        support confidence  coverage     lift count
+[1] {nums.length.username=0,                                                           
+     fullname.words=[1, 2],                                                            
+     has.description=1,                                                                
+     X.followers=&gt; 200}       =&gt; {fake=0} 0.2013889  0.9830508 0.2048611 1.966102   116
+[2] {profile.pic=1,                                                                    
+     name..username=0,                                                                 
+     nums.length.username=0,                                                           
+     fullname.words=[1, 2],                                                            
+     has.description=1}       =&gt; {fake=0} 0.2378472  0.9785714 0.2430556 1.957143   137
+[3] {profile.pic=1,                                                                    
+     nums.length.username=0,                                                           
+     fullname.words=[1, 2],                                                            
+     X.followers=&gt; 200,                                                                
+     X.follows=&gt; 200}         =&gt; {fake=0} 0.2222222  0.9770992 0.2274306 1.954198   128
+[4] {X.posts=&gt; 100,                                                                    
+     X.followers=&gt; 200}       =&gt; {fake=0} 0.2013889  0.9747899 0.2065972 1.949580   116
+[5] {profile.pic=1,                                                                    
+     nums.length.username=0,                                                           
+     has.description=1,                                                                
+     X.followers=&gt; 200}       =&gt; {fake=0} 0.2552083  0.9735099 0.2621528 1.947020   147</code></pre>
+</div>
+</div>
+<p>Son bastantes interesantes y precisamente tienen el componente que comentabamos antes. No son reglas tan generales como “si tiene foto de perfil la cuenta es real”, si no que tiene en cuenta mucho mos detalles, como or ejemplo la segunda regla. Con un 97.85% de confianza, si la cuenta tiene foto de perfil, el nombre real y el de usuario son distintos, tiene entre 1 y 2 palabras en el nombre real y tiene descripción, entonces, es real.</p>
+<p>Estas reglas son muy interesantes y nos dan pistas y conocimiento sobre que elementos son claves a la hora de ver si una cuenta es falsa o no.</p>
+</section>
+<section id="reglas-con-más-de-6-items" class="level3" data-number="4.2.5">
+<h3 data-number="4.2.5" class="anchored" data-anchor-id="reglas-con-más-de-6-items"><span class="header-section-number">4.2.5</span> Reglas con más de 6 items</h3>
+<p>Vamos ahora a buscar reglas que tengan al menos 6 items en total, (con la idea de que tengan 5 en la parte izquierda y 1 en la derecha), para ver que tipo de reglas podemos conseguir.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>big_rules <span class="ot">&lt;-</span> <span class="fu">apriori</span>(Tdatarules, <span class="at">parameter =</span> </span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>                       <span class="fu">list</span>(<span class="at">conf=</span><span class="fl">0.1</span>, <span class="at">supp=</span><span class="fl">0.2</span>, <span class="at">minlen=</span><span class="dv">6</span>, <span class="at">target=</span><span class="st">"rules"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Apriori
+
+Parameter specification:
+ confidence minval smax arem  aval originalSupport maxtime support minlen
+        0.1    0.1    1 none FALSE            TRUE       5     0.2      6
+ maxlen target  ext
+     10  rules TRUE
+
+Algorithmic control:
+ filter tree heap memopt load sort verbose
+    0.1 TRUE TRUE  FALSE TRUE    2    TRUE
+
+Absolute minimum support count: 115 
+
+set item appearances ...[0 item(s)] done [0.00s].
+set transactions ...[29 item(s), 576 transaction(s)] done [0.00s].
+sorting and recoding items ... [21 item(s)] done [0.00s].
+creating transaction tree ... done [0.00s].
+checking subsets of size 1 2 3 4 5 6 7 8 done [0.00s].
+writing ... [1351 rule(s)] done [0.00s].
+creating S4 object  ... done [0.00s].</code></pre>
+</div>
+</div>
+<p>Eliminamos las reglas redundantes</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>indices_no_redundantes <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="sc">!</span><span class="fu">is.redundant</span>(big_rules))</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>big_rules <span class="ot">&lt;-</span> big_rules[indices_no_redundantes]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Y nos quedamos con las significativas</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>indices_significativos <span class="ot">&lt;-</span> <span class="fu">is.significant</span>(big_rules, <span class="at">method=</span><span class="st">"fisher"</span>)</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>big_rules <span class="ot">&lt;-</span> big_rules[indices_significativos]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Veamos las reglas que nos llevan a que la cuenta es falsa:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>big_reglas_fake <span class="ot">&lt;-</span> <span class="fu">subset</span>(big_rules, rhs <span class="sc">%in%</span> <span class="st">"fake=1"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Tenemos 17 reglas con 6 o más items que nos llevan a que la cuenta es falsa."</code></pre>
+</div>
+</div>
+<p>Las 5 más importantes ordenadas por lift:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>big_reglas_fake_lift <span class="ot">&lt;-</span> <span class="fu">sort</span>(big_reglas_fake, <span class="at">by=</span><span class="st">"lift"</span>)</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="fu">inspect</span>(big_reglas_fake_lift[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    lhs                         rhs        support confidence  coverage lift count
+[1] {profile.pic=0,                                                               
+     external.URL=0,                                                              
+     has.nums.fullname=0,                                                         
+     fullname.words=[1, 2],                                                       
+     has.description=0}      =&gt; {fake=1} 0.2187500          1 0.2187500    2   126
+[2] {profile.pic=0,                                                               
+     name..username=0,                                                            
+     external.URL=0,                                                              
+     fullname.words=[1, 2],                                                       
+     has.description=0}      =&gt; {fake=1} 0.2430556          1 0.2430556    2   140
+[3] {profile.pic=0,                                                               
+     name..username=0,                                                            
+     has.nums.fullname=0,                                                         
+     fullname.words=[1, 2],                                                       
+     has.description=0}      =&gt; {fake=1} 0.2152778          1 0.2152778    2   124</code></pre>
+</div>
+</div>
+<p>Estamos viendo patrones que creíamos que no se daban en las cuentas falsas, como por ejemplo, que cuentas con 1 o 2 palabras en el nombre completo también pueden llevar a una cuenta falsa, y sin números en el nombre completo, con el nombre completo distinto del nombre de usuario…</p>
+<p>Esto nos indica que detectar una cuenta falsa no es tan fácil como buscar lo que pensamos que no es normal, si no que es más complejo.</p>
+</section>
+<section id="reglas-entre-otros-atributos" class="level3" data-number="4.2.6">
+<h3 data-number="4.2.6" class="anchored" data-anchor-id="reglas-entre-otros-atributos"><span class="header-section-number">4.2.6</span> Reglas entre otros atributos</h3>
+<p>Ahora vamos a buscar reglas entre los distintos atributos del dataset, que no tengan nada que ver con la clasificación de si la cuenta es falsa o no, con la idea de encontrar reglas que nos permitan derivar unos atributos a partir de otros. Usaremos las reglas generadas y almacenadas en la variable <strong>rules</strong>.</p>
+<p>Vamos a filtrar de forma que la regla no contenga nada referente a la variable fake, ni a la izquierda ni a la derecha. Vamos a filtrar también por reglas que tengan al menos 0.8 de confianza:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>rules_sin_fake <span class="ot">&lt;-</span> <span class="fu">subset</span>(rules, </span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>                              <span class="sc">!</span>(rhs <span class="sc">%pin%</span> <span class="st">"fake="</span>) <span class="sc">&amp;</span> </span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>                              <span class="sc">!</span>(lhs <span class="sc">%pin%</span> <span class="st">"fake="</span>) <span class="sc">&amp;</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>                              confidence <span class="sc">&gt;</span> <span class="fl">0.8</span>)</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="st">"Tenemos"</span>, <span class="fu">length</span>(rules_sin_fake), <span class="st">"reglas con confidence &gt; 0.8 </span></span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a><span class="st">      y sin la variable fake"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Tenemos 255 reglas con confidence &gt; 0.8 \n      y sin la variable fake"</code></pre>
+</div>
+</div>
+<p>Ordenamos por lift:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>rules_sin_fake_confidence <span class="ot">&lt;-</span> <span class="fu">sort</span>(rules_sin_fake, <span class="at">by=</span><span class="st">"lift"</span>)</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="fu">inspect</span>(rules_sin_fake_confidence[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    lhs                          rhs                   support confidence  coverage     lift count
+[1] {has.description=0,                                                                           
+     X.posts=0}               =&gt; {profile.pic=0}     0.2135417  0.8255034 0.2586806 2.764476   123
+[2] {profile.pic=1,                                                                               
+     X.posts=&gt; 100}           =&gt; {X.followers=&gt; 200} 0.2048611  0.9440000 0.2170139 2.107535   118
+[3] {X.posts=&gt; 100}           =&gt; {X.followers=&gt; 200} 0.2065972  0.9370079 0.2204861 2.091925   119
+[4] {profile.pic=1,                                                                               
+     nums.length.username=0,                                                                      
+     fullname.words=[1, 2],                                                                       
+     X.follows=&gt; 200}         =&gt; {X.followers=&gt; 200} 0.2274306  0.9357143 0.2430556 2.089037   131</code></pre>
+</div>
+</div>
+<p>Vemos relaciones interesantes:</p>
+<ul>
+<li>Cuentas sin descripción ni publicaciones, no tienen foto de perfil</li>
+<li>Cuentas con más de 100 publicaciones, tienen más de 200 seguidores</li>
+<li>Cuentas con foto de perfil, sin numeros en el nombre de usuario, con un nombre real con 1 o 2 palabras y más de 200 personas seguidas, tienen más de 200 seguidores</li>
+</ul>
+<p>Estamos viendo que nuestros datos tienen relaciones entre sí, algunas más o menos lógicas, y que hay ciertas cosas que nos dan pistas sobre si una cuenta es falsa o no.</p>
+</section>
+<section id="conjuntos-de-items-frecuentes" class="level3" data-number="4.2.7">
+<h3 data-number="4.2.7" class="anchored" data-anchor-id="conjuntos-de-items-frecuentes"><span class="header-section-number">4.2.7</span> Conjuntos de items frecuentes</h3>
+<p>Por último, vamos a buscar los conjuntos de items más frecuentes en nuestro dataset. Apriori, además de conseguirnos reglas, también nos permite conseguir los <strong>frequent itemsets</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>items <span class="ot">&lt;-</span> <span class="fu">apriori</span>(Tdatarules, <span class="at">parameter =</span> <span class="fu">list</span>(</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">supp =</span> <span class="fl">0.2</span>, </span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">conf =</span> <span class="fl">0.3</span>, </span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">target=</span><span class="st">"frequent itemsets"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Apriori
+
+Parameter specification:
+ confidence minval smax arem  aval originalSupport maxtime support minlen
+         NA    0.1    1 none FALSE            TRUE       5     0.2      1
+ maxlen            target  ext
+     10 frequent itemsets TRUE
+
+Algorithmic control:
+ filter tree heap memopt load sort verbose
+    0.1 TRUE TRUE  FALSE TRUE    2    TRUE
+
+Absolute minimum support count: 115 
+
+set item appearances ...[0 item(s)] done [0.00s].
+set transactions ...[29 item(s), 576 transaction(s)] done [0.00s].
+sorting and recoding items ... [21 item(s)] done [0.00s].
+creating transaction tree ... done [0.00s].
+checking subsets of size 1 2 3 4 5 6 7 8 done [0.00s].
+sorting transactions ... done [0.00s].
+writing ... [1648 set(s)] done [0.00s].
+creating S4 object  ... done [0.00s].</code></pre>
+</div>
+</div>
+<p>Vamos a ver los más frecuentes (ordenados por soporte)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>frequent_items <span class="ot">&lt;-</span> <span class="fu">sort</span>(items, <span class="at">by=</span><span class="st">"support"</span>)</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="fu">inspect</span>(<span class="fu">head</span>(frequent_items))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    items                                   support   count
+[1] {name..username=0}                      0.9652778 556  
+[2] {has.nums.fullname=0}                   0.8993056 518  
+[3] {name..username=0, has.nums.fullname=0} 0.8888889 512  
+[4] {external.URL=0}                        0.8836806 509  
+[5] {name..username=0, external.URL=0}      0.8506944 490  
+[6] {fullname.words=[1, 2]}                 0.8159722 470  </code></pre>
+</div>
+</div>
+<p>Observamos que lo más común en nuestro dataset es no tener el nombre de usuario igual al nombre real, con un 96.52% de veces, no tener números en el nombre real, no tener enlace externo…</p>
+<p>Vamos a visualizarlo mediante el objeto transaccional. Veamos los 10 items más frecuentes:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">itemFrequencyPlot</span>(Tdatarules, <span class="at">topN =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="association_rules_files/figure-html/unnamed-chunk-39-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="visualización-con-arulesviz" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="visualización-con-arulesviz"><span class="header-section-number">4.3</span> Visualización con arulesViz</h2>
+<p>arulesViz es una herramienta para visualizar y comprender las reglas de asociación generadas con arules en R. Permite representar gráficamente las relaciones entre elementos en nuestros datos, facilitando la identificación de patrones complejos.</p>
+<p>Con arulesViz, podemos visualizar las reglas como grafos o diagramas de coordenadas paralelas, lo que nos ayuda a entender la importancia relativa de cada elemento.</p>
+<p>Requieren un mínimo de entendimiento ya que no son gráficos tan intuitivos como uno de barras, pero al entenderlos correctamente, proporcionan mucha información muy útil de manera visual.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(arulesViz)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(rules, <span class="at">method =</span> <span class="st">"graph"</span>, <span class="at">control =</span> <span class="fu">list</span>(<span class="at">type =</span> <span class="st">"items"</span>),</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">shading =</span> <span class="st">"lift"</span>, <span class="at">measure =</span> <span class="st">"confidence"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Available control parameters (with default values):
+layout   =  stress
+circular     =  FALSE
+ggraphdots   =  NULL
+edges    =  &lt;environment&gt;
+nodes    =  &lt;environment&gt;
+nodetext     =  &lt;environment&gt;
+colors   =  c("#EE0000FF", "#EEEEEEFF")
+engine   =  ggplot2
+max  =  100
+verbose  =  FALSE</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="association_rules_files/figure-html/unnamed-chunk-41-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Este gráfico nos muestra cómo ciertos atributos están relacionados entre sí con base en el lift y la confianza. Por ejemplo, se puede observar que “fake=1” tiene una relación significativa con otros atributos como “X.posts=0” y “profile.pic=0”, lo que sugiere que estas combinaciones son más comunes de lo esperado y tienen alta confianza en la regla.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(reglas_fake, <span class="at">method =</span> <span class="st">"graph"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="association_rules_files/figure-html/unnamed-chunk-42-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>“profile.pic=0” tiene un alto lift y soporte, lo que indica que es común encontrar cuentas sin foto de perfil en el conjunto de datos y que esta característica tiene una alta co-ocurrencia significativa con otros atributos. Las reglas asociadas a “fake=1” también tienen un alto soporte, sugiriendo que estas combinaciones son comunes en los datos.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(reglas_fake, <span class="at">method =</span> <span class="st">"paracoord"</span>, <span class="at">control =</span> <span class="fu">list</span>(<span class="at">reorder =</span> <span class="cn">TRUE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="association_rules_files/figure-html/unnamed-chunk-43-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Podemos ver que las reglas que tienen “X.posts=0” y “fake=1” también suelen tener valores específicos para otras variables como “X.followers” y “profile.pic”. Este gráfico facilita la identificación de patrones complejos y de cómo múltiples atributos se combinan en las reglas de asociación.</p>
+</section>
+<section id="conclusiones" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="conclusiones"><span class="header-section-number">4.4</span> Conclusiones</h2>
+<p>Con las de reglas de asociación, hemos descubierto que nuestros datos contienen un conocimiento valioso y hemos identificado las primeras relaciones significativas entre las características de las cuentas de Instagram. Este análisis nos ha permitido derivar varias reglas que aportan información relevante sobre el comportamiento de estas cuentas y su clasificación como falsas o reales:</p>
+<ol type="1">
+<li><strong>Cuentas falsas</strong> (dentro de nuestro dataset):
+<ul>
+<li>Con una confianza del 100% en nuestro dataset, las cuentas que no tienen foto de perfil ni publicaciones son falsas.</li>
+<li>Las cuentas sin foto de perfil y sin descripción también son falsas.</li>
+<li>Las cuentas sin foto de perfil y que son públicas son falsas.</li>
+</ul></li>
+<li><strong>Cuentas reales</strong> (dentro de nuestro dataset):
+<ul>
+<li>Con un 97.85% de confianza en nuestro dataset, las cuentas con foto de perfil, nombre de usuario distinto del nombre real, entre 1 y 2 palabras en el nombre real, y que tienen descripción, son reales.</li>
+<li>Las cuentas con foto de perfil, sin números en el nombre completo, nombre completo diferente del nombre de usuario, y con entre 1 y 2 palabras en el nombre real, son reales con una alta confianza en nuestro dataset.</li>
+</ul></li>
+<li><strong>Reglas de asociación generales</strong>:
+<ul>
+<li>Las cuentas sin descripción ni publicaciones, no tienen foto de perfil.</li>
+<li>Las cuentas con más de 100 publicaciones, tienen más de 200 seguidores.</li>
+<li>Las cuentas con foto de perfil, sin números en el nombre de usuario, con un nombre real de 1 o 2 palabras, y que siguen a más de 200 cuentas, tienen más de 200 seguidores.</li>
+</ul></li>
+<li><strong>Itemsets más frecuentes</strong>:
+<ul>
+<li>Tener el nombre de usuario distinto del nombre real</li>
+<li>No tener números en el nombre real</li>
+<li>No tener enlace en el perfil</li>
+</ul></li>
+</ol>
+<p>Estas reglas nos muestran patrones interesantes y nos ayudan a entender mejor cómo ciertos atributos de las cuentas de Instagram se relacionan entre sí y con la autenticidad de la cuenta.</p>
+<p>Sin embargo, es crucial tener en cuenta que estas conclusiones se basan en un conjunto de datos limitado. Para poder generalizar estos hallazgos a una población más amplia de cuentas de Instagram, necesitaríamos un dataset más grande y representativo.</p>
+<p>Además, aunque las reglas de asociación nos han proporcionado una buena base de conocimiento, debemos seguir aplicando otras técnicas de análisis de datos para extraer aún más información y verificar la robustez de nuestros hallazgos. Métodos adicionales como la regresión y FCA pueden complementar y profundizar en el conocimiento obtenido hasta ahora, mejorando así nuestra capacidad de detectar cuentas falsas y entender el comportamiento de las cuentas de Instagram en general.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./data_visualization.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Visualización de datos</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./formal_concept_analysis.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">FCA</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>
